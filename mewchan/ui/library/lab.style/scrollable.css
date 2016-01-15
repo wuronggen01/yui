@@ -1,0 +1,60 @@
+.scrollable {
+  overflow: hidden; }
+
+.scrollable.scrollable-reinited.actionpan-changing > .scrollable-indicator-x, .scrollable.scrollable-reinited.actionpan-changing > .scrollable-indicator-y {
+  opacity: 1;
+  transition-property: opacity;
+  -webkit-transition-property: opacity;
+  -moz-transition-property: opacity;
+  -ms-transition-property: opacity;
+  -o-transition-property: opacity;
+  transition-duration: 0ms;
+  -webkit-transition-duration: 0ms;
+  -moz-transition-duration: 0ms;
+  -ms-transition-duration: 0ms;
+  -o-transition-duration: 0ms;
+  transition-delay: 0s;
+  -webkit-transition-delay: 0s;
+  -moz-transition-delay: 0s;
+  -ms-transition-delay: 0s;
+  -o-transition-delay: 0s; }
+.scrollable.scrollable-reinited.unscrollable-in-x > .scrollable-indicator-x {
+  display: none; }
+.scrollable.scrollable-reinited.unscrollable-in-y > .scrollable-indicator-y {
+  display: none; }
+.scrollable.scrollable-reinited > .scrollable-content {
+  position: absolute;
+  left: 0px;
+  top: 0px;
+  width: 300px;
+  height: 1000px;
+  overflow: visible; }
+.scrollable.scrollable-reinited > .scrollable-indicator-x, .scrollable.scrollable-reinited > .scrollable-indicator-y {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+  transition-property: opacity;
+  -webkit-transition-property: opacity;
+  -moz-transition-property: opacity;
+  -ms-transition-property: opacity;
+  -o-transition-property: opacity;
+  transition-duration: 800ms;
+  -webkit-transition-duration: 800ms;
+  -moz-transition-duration: 800ms;
+  -ms-transition-duration: 800ms;
+  -o-transition-duration: 800ms;
+  transition-delay: 1000ms;
+  -webkit-transition-delay: 1000ms;
+  -moz-transition-delay: 1000ms;
+  -ms-transition-delay: 1000ms;
+  -o-transition-delay: 1000ms; }
+  .scrollable.scrollable-reinited > .scrollable-indicator-x:before, .scrollable.scrollable-reinited > .scrollable-indicator-y:before {
+    content: '';
+    position: absolute;
+    left: 2px;
+    top: 2px;
+    bottom: 2px;
+    right: 2px;
+    border-radius: 10px;
+    box-shadow: 0px 0px 1px rgba(255, 255, 255, 0.5);
+    background-color: rgba(0, 0, 0, 0.5); }

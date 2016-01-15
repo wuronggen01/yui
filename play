@@ -1,0 +1,19 @@
+#!/bin/bash
+
+SOURCE="${BASH_SOURCE[0]}"
+
+while [ -h "$SOURCE" ]; do
+  DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+  SOURCE="$(readlink "$SOURCE")"
+  [[ $SOURCE != /* ]] && SOURCE="$DIR/$SOURCE"
+done
+
+DIR="$( cd -P "$( dirname "$SOURCE" )" && pwd )"
+
+cd "$DIR"
+
+MEW_ARCH=$(uname -s | tr '[:upper:]' '[:lower:]')-$(uname -m | sed 's/i[3-6]86/x86/g')
+
+export PATH=$DIR/runtime/$MEW_ARCH:$PATH
+
+$DIR/runtime/commands/mew $DIR/mewchan

@@ -1,0 +1,29 @@
+.storyboard-page {
+  width: 100%;
+  bottom: 0px;
+  border-top: 1px #ababab solid;
+  z-index: 1000;}
+
+.tabbarItem {
+  margin-top: 2px;
+  position: relative;
+  float: left;
+  width: 20%;
+  height: 60px;
+  text-align: center;
+  line-height: 60px; }
+
+img {
+  width: 100%;
+  height: 50px;
+  margin-top: 2px; }
+
+.Tabbar-item-name {
+  display: none;
+  margin-top: -62px;
+  height: 10px;
+  width: 100%;
+  color: gray; }
+
+.Tabbbar-item-name-sel {
+  color: #51D1A6; }

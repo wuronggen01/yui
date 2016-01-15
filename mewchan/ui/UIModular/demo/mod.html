@@ -1,0 +1,21 @@
+<div class="goodidea-search1-item" template:on-click="switchToComInfo()">
+    <img class="goodidea-search1-img" src="${item.icon}" />
+    <div class="goodidea-search1-rightbox">
+        <div class="goodidea-search1-rightbox-title">${item.company}</div>
+        <div class="goodidea-search1-rightbox-subtitle">
+            <div class="goodidea-search1-rightbox-subtitle1">
+                <img src="goodea/content/main-articlePage-search-none/res/publish.png" class="goodidea-search1-rightbox-subtitle1-img" />
+                <div class="goodidea-search1-subtitle1-content">${item.space}篇</div>
+            </div>
+            <div class="goodidea-search1-rightbox-subtitle1 subtitle2">
+                <img src="goodea/content/main-articlePage-search-none/res/renshu.png" class="goodidea-search1-rightbox-subtitle1-img2" />
+                <div class="goodidea-search1-subtitle1-content2">${item.participants}人</div>
+            </div>
+        </div>
+        <div class="goodidea-search1-subtitle-tag-box">
+            <template:map list="if(item.tags, item.tags, [])" id-getter="{tag}" item-variant-name="tag" index-variant-name="index">
+                <div class="goodidea-search1-subtitle-tag">${tag}</div>
+            </template:map>
+        </div>
+    </div>
+</div>

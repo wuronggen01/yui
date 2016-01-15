@@ -1,0 +1,49 @@
+{
+
+    "name": "simplechan",
+
+    "domain": "cn.mewmew.mewchan",
+
+    "logLevel": "debug",
+
+    "logMewWithUsages": "*",
+
+    "interpreters": {
+
+    },
+
+    "kitties": {
+
+
+    },
+
+    "playgrounds": {
+        "http": {
+            "port" : "65442"
+        }
+    },
+
+    "resources": [
+        {
+            "playground": "http",
+            "innerPath": "ui",
+            "outerPath": "/",
+            "autoindexFile": "root.html",
+            "autofixJXResourceBug": false,
+            "gzipEnabled": true,
+            "streamEnabled": true,
+            "autogzipExtensions": [".html", ".htm", ".js", ".css", ".json", ".xml", ".svg", ".txt"],
+            "localOnly": true
+        }
+    ],
+
+    "friends": {
+        "mewchan.ui": {
+            "playground": "http",
+            "outerPath": "/mewchan.ui",
+            "localOnly": true,
+            "enableCORS" : true
+        }
+    }
+
+}

@@ -1,0 +1,68 @@
+{
+
+    "!sourcePrefix": "ui",
+
+    "ui/script/jquery.other.js": {
+        "scripts": [
+            "/library/lab.jquery/jquery-fake.js",
+            "/library/lab.module/index.js",
+            "/library/lab.query/resource.js",
+            "/library/lab.query/module.js",
+            "/library/lab.web/jquery.other.js"
+        ]
+    },
+
+    "ui/script/jquery.other.json": {
+        "files": [
+            "/library/lab.common",
+            "/library/lab.kitty",
+            "/library/lab.module"
+        ]
+    },
+
+    "ui/script/jquery-2.x.js": {
+
+        "scripts": [
+
+            "/library/lab.jquery/jquery-2.1.4.js",
+            "/library/lab.module/index.js",
+            "/library/lab.query/resource.js",
+            "/library/lab.query/module.js",
+            "/library/lab.web/jquery.js"
+        ]
+
+    },
+
+    "ui/script/jquery.library.js": {
+        "scripts": [
+            "/library/lab.jquery/jquery-2.1.4.js",
+            "/library/lab.module/index.js",
+            "/library/lab.query/resource.js",
+            "/library/lab.query/module.js",
+            "/library/lab.web/jquery.other.js"
+        ]
+    },
+
+    "ui/script/jquery.json": {
+
+        "files": [
+            "/library/lab.common",
+            "/library/lab.dom",
+            "/library/lab.kitty",
+            "/library/lab.module",
+            "/admin"
+        ]
+
+    },
+
+    "ui/index.html": {
+        "files": [
+            "/library/lab.common",
+            "/library/lab.dom",
+            "/library/lab.kitty",
+            "/library/lab.module",
+            "/admin"
+        ]
+    }
+
+}

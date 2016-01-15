@@ -1,0 +1,246 @@
+#!/usr/bin/env mew_js
+
+var path = require("path");
+
+var mewUtil = require("mew_util");
+
+var help = false;
+var version = false;
+
+var testPath = process.cwd();
+var tests = [];
+
+var testCaseFetchTimeout = 1000;
+var testCaseTimeout = 2000;
+
+var pipeCaseOutput = false;
+var caseOutputIsText = true;
+var onlyRecordCaseOutputToFile = true;
+
+var logLevel = null;
+var logStyle = null;
+var logSupportMultipleLine = null;
+
+var logFailedCasesAtLast = true;
+
+var invalidTests = [];
+
+process.argv.slice(2).forEach(function (argument) {
+
+    switch (argument.split("=")[0]) {
+
+        case "--help": { help = true; break; }
+        case "--version": { version = true; break; }
+
+        case "--test-path": { testPath = argument.split("=").slice(1).join("="); break; }
+
+        case "--log-level": { logLevel = argument.split("=").slice(1).join("="); break; }
+        case "--log-style": { logStyle = argument.split("=").slice(1).join("="); break; }
+        case "--log-support-multiple-line": { logSupportMultipleLine = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        case "--log-failed-cases-at-last": { logFailedCasesAtLast = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        case "--fetch-timeout": { testCaseFetchTimeout = parseInt(argument.split("=").slice(1).join("=")); break; }
+        case "--timeout": { testCaseTimeout = parseInt(argument.split("=").slice(1).join("=")); break; }
+
+        case "--pipe-case-output": { pipeCaseOutput = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        case "--case-output-is-text": { caseOutputIsText = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        case "--only-record-case-output-to-file": { onlyRecordCaseOutputToFile = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        default: { 
+
+            if (/^(test\/)?[a-z0-9\-_\.]+$/gim.test(argument) && (argument.slice(-3) !== ".js")) {
+                tests.push(argument.split("/").slice(-1)[0]);
+            } else if (/^(test\/)?[a-z0-9\-_\.]+\/[a-z0-9\-_\.]+\.js$/gim.test(argument)) {
+                tests.push(argument.split("/").slice(-2).join("/"));
+            } else if (/^[a-z0-9\-_]+@(test\/)?[a-z0-9\-_\.]+\/[a-z0-9\-_\.]+\.js$/gim.test(argument)) {
+
+                var testCase = argument.split("@")[0];
+                var testUnit = argument.split("@").slice(1).join("@").split("/").slice(-2).join("/");
+
+                tests.push(testCase + "@" + testUnit);
+
+            } else {
+
+                invalidTests.push(argument);
+
+            }
+
+            break; 
+        }
+
+    }
+
+});
+
+if (help) {
+
+    console.log("");
+    console.log("Test utility for Mewchan's world");
+    console.log("--------------------------------------------------------------------------------");
+    console.log("                             --help  show this information");
+    console.log("                          --version  print version");
+    console.log("                        --test-path  default current path");
+    console.log("                        --log-level  default 'info'");
+    console.log("                        --log-style  'none', 'light' or 'dark'");
+    console.log("        --log-support-multiple-line  default 'yes'");
+    console.log("         --log-failed-cases-at-last  default 'yes'");
+    console.log("                    --fetch-timeout  default '1000'");
+    console.log("                          --timeout  default '2000'");
+    console.log("                 --pipe-case-output  default 'no'");
+    console.log("              --case-output-is-text  default 'yes'");
+    console.log("  --only-record-case-output-to-file  default 'yes'");
+    console.log("                                  *  could be 'package' or 'test/package' for \n" + 
+                "                                         package test");
+    console.log("                                  *  could be 'package/unit.js' or \n" + 
+                "                                         'test/package/unit.js' for unit test");
+    console.log("                                  *  could be 'case@package/unit.js' or \n" + 
+                "                                         'case@test/package/unit.js' for case \n" + 
+                "                                         test");
+    console.log("");
+
+} else if (version) {
+
+    console.log("0.1.0");
+
+} else {
+
+    mewUtil.setUtilHomeDir(testPath, function () {
+
+        var logger = new mewUtil.Logger({
+            "logLevel": logLevel,
+            "logStyle": logStyle,
+            "supportMultipleLine": logSupportMultipleLine,
+            "autorecordFileLine": false
+        });
+
+        process.on("uncaughtException", function (error) {
+            if (!error.processed) {
+                logger.error(error);
+                process.exit(-1);
+            }
+        });
+        
+        invalidTests.forEach(function (argument) {
+            logger.error("Invalid argument: " + argument);
+        });
+
+        mewUtil.test(testPath, {
+
+            "tests": tests,
+
+            "testCaseFetchTimeout": testCaseFetchTimeout,
+            "testCaseTimeout": testCaseTimeout,
+
+            "pipeCaseOutput": pipeCaseOutput,
+            "caseOutputIsText": caseOutputIsText,
+            "onlyRecordCaseOutputToFile": onlyRecordCaseOutputToFile,
+
+            "onProgressReported": function (state) {
+
+                if (state.error) {
+
+                    logger.error(state.message);
+
+                    if (!state.error.notImplemented) {
+                        logger.error(state.error);
+                    }
+
+                } else if (state.milestone) {
+                    logger.celebr(state.message);
+                } else {
+                    logger.debug(state.message);
+                }
+
+            },
+
+            "onCaseLogContent": function (level, message) {
+
+                logger.logWithLevel("test.js", level, message);
+
+            }
+
+        }, function (error, report) {
+
+            if (error) {
+
+                logger.system(error);
+
+            } else {
+
+                var failedCases = [];
+                var failedUnits = [];
+
+                Object.keys(report.packages).forEach(function (testPackage) {
+
+                    Object.keys(report.packages[testPackage].units).forEach(function (testUnit) {
+
+                        if (report.packages[testPackage].units[testUnit].state === "failed") {
+
+                            failedUnits.push(testPackage + "/" + testUnit);
+
+                        } else {
+
+                            Object.keys(report.packages[testPackage].units[testUnit].cases).forEach(function (testCase) {
+
+                                if (!report.packages[testPackage].units[testUnit].cases[testCase].passed) {
+
+                                    var caseName = testCase + "@" + testPackage + "/" + testUnit;
+
+                                    if (report.packages[testPackage].units[testUnit].cases[testCase].error.notImplemented) {
+                                        failedCases.push(caseName + " (not implemented)");
+                                    } else {
+                                        failedCases.push(caseName);
+                                    }
+
+                                }
+
+                            });
+
+                        }
+
+                    });
+
+                });
+
+                if (report.allPassed) {
+
+                    if (report.testType === "filtered") {
+                        logger.celebr("All targeted test cases(" + report.numberOfPassedCases + ") passed within " + report.timeUsed);
+                    } else {
+                        logger.celebr("All test cases(" + report.numberOfPassedCases + ") passed within " + report.timeUsed);
+                    }
+
+                    logger.info("Test report file: " + path.resolve(testPath, "test", "out", "report.json"));
+
+                } else {
+
+                    if (report.testType === "filtered") {
+                        logger.info("Targeted tests: \n    " + report.tests.join("\n    "));
+                    }
+
+                    logger.info((report.numberOfPassedCases / report.numberOfTestedCases * 100).toFixed(1) + "% of tests passed finally within " + report.timeUsed);
+
+                    if (report.numberOfFailedUnits > 0) {
+                        logger.warn("Test units: " + (report.numberOfTestedUnits - report.numberOfFailedUnits) + " passed, " + report.numberOfFailedUnits + " failed");
+                        logger.error("Failed units: \n    " + failedUnits.join("\n    "));
+                    }
+
+                    logger.warn("Test cases: " + report.numberOfPassedCases + " passed, " + report.numberOfFailedCases + " failed (" + report.numberOfNotImplementedCases + " not implemented)");
+                    if (logFailedCasesAtLast) {
+                        logger.error("Failed cases: \n    " + failedCases.join("\n    "));
+                    }
+
+                    logger.info("Test report file: " + path.resolve(testPath, "test", "out", "report.json"));
+
+                }
+
+            }
+
+        });
+
+    });
+
+}

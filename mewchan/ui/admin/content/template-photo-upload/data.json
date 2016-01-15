@@ -1,0 +1,11 @@
+{
+    "galleryStart" : 0,
+    "galleryLimit" : 12,
+    "imageWidth" : 0.9,
+    "imageHeight" : 0,
+    "uploadFileQueryAPI" : null,
+    "uploadFileAPI" : null,
+    "uploadFileParam" : null,
+    "title" : "选择或上传图片",
+    "saveTitle" : "确定选择"
+}

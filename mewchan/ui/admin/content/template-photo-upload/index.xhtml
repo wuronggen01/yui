@@ -1,0 +1,34 @@
+<div class="bg-gray-lighter" id="upload-wrapper" >
+    <div class="block">
+        <ul class="nav nav-tabs nav-tabs-alt">
+            <li class="active" tmpl:on-click="switchUploadModalTab('btabs-upload-dropzone')">
+                <a >直接上传</a>
+            </li>
+            <li class="${if(gallery.length,'','hidden')}" tmpl:on-click="switchUploadModalTab('btabs-upload-gallery')"  >
+                <a >从相册中选择</a>
+            </li>
+        </ul>
+        <div class="tab-content">
+            <div class="tab-pane active" id="btabs-upload-dropzone">
+                <div class="block-content block-content-full">
+                    <form  style="min-height: 250px;padding: 75px;" class="dropzone" action="javascript:void(0)"></form>
+                </div>
+            </div>
+            <div class="tab-pane" id="btabs-upload-gallery"  >
+                <div class="row js-gallery waterfall" >
+                    <tmpl:map list="seq(1,maxColumn)" id-getter="{item}"  >
+                        <div class="col-sm-${12/maxColumn}">
+                            <tmpl:map list="if(gallery,gallery,[])" id-getter="{gitem.id}" item-variant-name="gitem" index-variant-name="gindex"  >
+                                <tmpl:if test="${gindex%maxColumn==index}" >
+                                    <a class="img-link img-thumb" tmpl:on-click="onGalleryModalSelection(gitem)"  >
+                                        <img class="img-responsive" src="${gitem.linkURL}" alt="" />
+                                    </a>
+                                </tmpl:if>
+                            </tmpl:map>
+                            </div>
+                    </tmpl:map>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

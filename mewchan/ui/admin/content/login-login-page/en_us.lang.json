@@ -1,0 +1,31 @@
+{
+	"登录" : "Login" ,
+
+	"忘记密码?" : "Forgot Password?" ,
+
+	"新建账号" : "New Account" ,
+
+    "欢迎来到${application.name}, 请登录." : "Welcome to ${application.name},  please login.",
+
+	"用户名" : "Username" ,
+
+	"密码" : "Password" ,
+
+	"记住登录" : "Remember Me?" ,
+
+	"请输入用户名" : "Please enter a username" ,
+
+	"你的用户名至少要包含6个字符" : "Your username must consist of at least 6 characters" ,
+
+	"你的密码至少要包含6个字符" : "Your password must be at least 6 characters long" ,
+
+	"请输入密码" : "Please provide a password" ,
+
+	"登录失败" : "Login failed" ,
+
+    ", 请重试" : ", Please retry",
+
+	"登录成功" : "Login success" ,
+
+	"我们将在2秒后跳转进入首页" : ", we will redirect to index page in 2 seconds" 
+}

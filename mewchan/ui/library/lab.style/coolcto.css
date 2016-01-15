@@ -1,0 +1,244 @@
+/*list-block样式*/
+
+.list-block {
+    width: 100%;
+    background-color: #FFF;
+}
+
+.list-block ul {
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    list-style: none;
+    position: relative;
+}
+
+.list-block li {
+    width: 100%;
+}
+
+.list-block .item-content {
+    padding: 15px;
+    width: 100%;
+}
+
+.list-block .item-inner {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: -webkit-box;
+}
+
+.list-block .item-title.label {
+    vertical-align: top;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.list-block .item-title {
+    position: relative;
+    width: 60px;
+    font-size: 13px;
+}
+
+.list-block .item-input {
+    -moz-box-flex: 1;
+    -webkit-box-flex: 1;
+    box-flex: 1;
+}
+
+.list-block .item-input input {
+    width: 100%;
+}
+
+.list-block .item-btn {
+    padding-left: 15px;
+    text-align: right;
+    width: 85px;
+}
+
+.form-lab-btn {
+    color: #31406B;
+    line-height: 20px;
+    position: relative;
+}
+
+.form-lab-sel {
+    color: #CCCCCC;
+    line-height: 20px;
+    position: relative;
+    padding-left: 22px;
+    background-size: 20px;
+    background-repeat: no-repeat;
+}
+
+.list-block input[type="text"],
+.list-block input[type="password"],
+.list-block input[type="search"],
+.list-block input[type="email"],
+.list-block input[type="tel"],
+.list-block input[type="url"],
+.list-block input[type="date"],
+.list-block input[type="datetime-local"],
+.list-block input[type="time"],
+.list-block input[type="number"],
+.list-block select,
+.list-block textarea {
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    -ms-appearance: none;
+    appearance: none;
+    border: none;
+    background: none;
+    border-radius: 0 0 0 0;
+    box-shadow: none;
+    display: block;
+    padding: 0px;
+    margin: 0;
+}
+
+
+/*list-block样式*/
+
+
+/*表单按钮样式*/
+
+.form-item-btn {
+    color: white;
+    width: 100%;
+    height: 44px;
+    font-size: 15px;
+    line-height: 44px;
+    border-radius: 4px;
+    font-weight: bold;
+    text-align: center;
+    background-color: #70C4F3;
+}
+
+
+/*app背景色*/
+
+.app-BGColor {
+    background-color: #F8F8F8;
+}
+
+
+/*app文字色*/
+
+.app-font-color {
+    color: #F8F8F8;
+}
+
+
+/*隐藏*/
+
+.sys-hide {
+    display: none;
+}
+
+
+/*显示*/
+
+.sys-block {
+    display: block;
+}
+
+
+/*div间距:8px*/
+
+.div-space8 {
+    margin-top: 8px;
+}
+
+
+/*div间距:10px*/
+
+.div-space10 {
+    margin-top: 10px;
+}
+
+
+/*div间距:15px*/
+
+.div-space15 {
+    margin-top: 15px;
+}
+
+
+/*div间距:20px*/
+
+.div-space20 {
+    margin-top: 20px;
+}
+
+
+/*透明度:0%*/
+
+.sys-hyaline0 {
+    opacity: 0;
+}
+
+
+/*透明度:30%*/
+
+.sys-hyaline3 {
+    opacity: 0.3;
+}
+
+
+/*透明度:50%*/
+
+.sys-hyaline5 {
+    opacity: 0.5;
+}
+
+
+/*透明度:70%*/
+
+.sys-hyaline7 {
+    opacity: 0.7;
+}
+
+
+/*透明度:100%*/
+
+.sysHyaline {
+    opacity: 1;
+}
+
+
+/*背景透明度：0%*/
+
+.sys-BGHyaline0 {
+    background-color: rgba(0, 0, 0, 0);
+}
+
+
+/*背景透明度：30%*/
+
+.sys-BGHyaline3 {
+    background-color: rgba(0, 0, 0, 0.3);
+}
+
+
+/*背景透明度：50%*/
+
+.sys-BGHyaline5 {
+    background-color: rgba(0, 0, 0, 0.5);
+}
+
+
+/*背景透明度：70%*/
+
+.sys-BGHyaline7 {
+    background-color: rgba(0, 0, 0, 0.7);
+}
+
+
+/*背景透明度：100%*/
+
+.sys-BGHyaline {
+    background-color: rgba(0, 0, 0, 1);
+}

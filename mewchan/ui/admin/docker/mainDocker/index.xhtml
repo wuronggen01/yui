@@ -1,0 +1,68 @@
+<div id="side-overlay-scroll">
+    <div class="side-header side-content">
+        <!-- Layout API, functionality initialized in App() -> uiLayoutApi() -->
+        <button class="btn btn-default pull-right" type="button" tmpl:on-click="dockerClose()">
+            <i class="fa fa-times"></i>
+        </button>
+        <span>
+            <img class="img-avatar img-avatar32" src="/assets/img/avatars/avatar10.jpg" alt="" />
+            <span class="font-w600 push-10-l">User${data.token}</span>
+        </span>
+    </div>
+    <div class="side-content remove-padding-t">
+        <div class="block pull-r-l">
+            <div class="block-header bg-gray-lighter">
+                <ul class="block-options">
+                    <li>
+                        <button type="button" data-toggle="block-option" data-action="refresh_toggle" data-action-mode="demo"><i class="si si-refresh"></i></button>
+                    </li>
+                    <li>
+                        <button type="button" data-toggle="block-option" data-action="content_toggle"><i class="si si-arrow-up"></i></button>
+                    </li>
+                </ul>
+                <h3 class="block-title">Recent Activity</h3>
+            </div>
+            <div class="block-content">
+                <!-- Activity List -->
+                <ul class="list list-activity">
+                    <li>
+                        <i class="si si-wallet text-success"></i>
+                        <div class="font-w600">New sale ($15)</div>
+                        <div><a href="javascript:void(0)">Admin Template</a></div>
+                        <div>
+                            <small class="text-muted">3 min ago</small>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="si si-pencil text-info"></i>
+                        <div class="font-w600">You edited the file</div>
+                        <div><a href="javascript:void(0)"><i class="fa fa-file-text-o"></i> Documentation.doc</a></div>
+                        <div>
+                            <small class="text-muted">15 min ago</small>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="si si-close text-danger"></i>
+                        <div class="font-w600">Project deleted</div>
+                        <div><a href="javascript:void(0)">Line Icon Set</a></div>
+                        <div>
+                            <small class="text-muted">4 hours ago</small>
+                        </div>
+                    </li>
+                    <li>
+                        <i class="si si-wrench text-warning"></i>
+                        <div class="font-w600">Core v2.5 is available</div>
+                        <div><a href="javascript:void(0)">Update now</a></div>
+                        <div>
+                            <small class="text-muted">6 hours ago</small>
+                        </div>
+                    </li>
+                </ul>
+                <div class="text-center">
+                    <small><a href="javascript:void(0)">Load More..</a></small>
+                </div>
+                <!-- END Activity List -->
+            </div>
+        </div>
+    </div>
+</div>

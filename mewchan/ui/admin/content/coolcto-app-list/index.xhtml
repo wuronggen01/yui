@@ -1,0 +1,97 @@
+<div class="content bg-gray-lighter">
+    <div class="row items-push">
+        <div class="col-sm-7">
+            <h1 class="page-heading">
+                CoolCTO App列表
+                <small>Do not play this at home !!!</small>
+            </h1>
+        </div>
+    </div>
+    <div class="row">
+        <tmpl:if test="${applist.length != 0}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th class="text-center" style="width: 50px;">#</th>
+                        <th>应用名称 </th>
+                        <th class="hidden-xs" style="width: 15%;">appID</th>
+                        <th class="hidden-xs" style="width: 15%;">appSecret</th>
+                        <th class="text-center" style="width: 100px;">操作
+                            <button tmpl:on-click="addApp()" class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="" data-original-title="Edit Client"><i class="fa fa-plus"></i></button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tmpl:map list="${applist}">
+                        <tr>
+                            <td class="text-center">${item.id}</td>
+                            <td>${item.application.name}</td>
+                            <td class="hidden-xs">
+                                <span class="">${item.application.appID}</span>
+                            </td>
+                            <td class="hidden-xs">
+                                <span class="">${item.application.appSecret}</span>
+                            </td>
+                            <td class="text-center">
+                                <div class="btn-group">
+                                    <button tmpl:on-click="switchToAppInfo()" class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="" data-original-title="Edit Client"><i class="fa fa-pencil"></i></button>
+                                </div>
+                            </td>
+                        </tr>
+                    </tmpl:map>
+                </tbody>
+            </table>
+        </tmpl:if>
+    </div>
+</div>
+
+<x:viewLayer>
+    <div class="modal fade" tmpl:on-hidden.bs.modal="hideUploadModal()" id="modal-new-app" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-popout">
+            <div class="modal-content">
+                <div class="block block-themed block-transparent remove-margin-b">
+                    <div class="block-header bg-primary-dark">
+                        <ul class="block-options">
+                            <li>
+                                <button data-dismiss="modal" type="button"><i class="si si-close"></i></button>
+                            </li>
+                        </ul>
+                        <h3 class="block-title">添加新应用</h3>
+                    </div>
+                    <div class="block-content block-content-narrow">
+                        <form class="form-horizontal push-10-t" id="form-new-app" action="javascript:void(0)" method="post" onsubmit="return false;">
+                            <div class="form-group">
+                                <div class="col-sm-9">
+                                    <div class="form-material">
+                                        <input class="form-control" type="text"  name="appName" placeholder="请输入应用名称" />
+                                        <label for="material-text">应用名称</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-9">
+                                    <div class="form-material">
+                                        <input class="form-control" type="text"  name="appID" placeholder="请输入应用ID" />
+                                        <label for="material-text">应用ID</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-9">
+                                    <div class="form-material">
+                                        <input class="form-control" type="text"  name="appSecret" placeholder="请输入应用Secre" />
+                                        <label for="material-text">应用Secret</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-sm btn-default" type="button" data-dismiss="modal">关闭</button>
+                    <button tmpl:on-click="saveCoolCTOApp()" class="btn btn-sm btn-primary" type="button" data-dismiss="modal"><i class="fa fa-check"></i>保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</x:viewLayer>

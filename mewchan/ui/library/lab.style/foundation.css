@@ -1,0 +1,30 @@
+html, body {
+    padding: 0px;
+    margin: 0px;
+    width: 100%;
+}
+* {
+    cursor: default;
+    box-sizing: border-box;
+    /*user-select: none;
+  -webkit-user-select: none;*/
+    -webkit-tap-highlight-color: transparent;
+}
+*:focus {
+    outline: none;
+}
+input[type='text'], input[type='password'], input[type='tel'], input[type='date'] {
+    -webkit-user-select: text !important;
+}
+ul, ol, li {
+    list-style-type: none;
+}
+.template-animation {
+    pointer-events: none;
+}
+
+*:not(input, textarea) {
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-overflow-scrolling: touch;
+}

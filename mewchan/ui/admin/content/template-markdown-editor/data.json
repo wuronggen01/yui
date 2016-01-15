@@ -1,0 +1,9 @@
+{
+    "galleryStart" : 0,
+    "galleryLimit" : 12,
+    "imageWidth" : 0.9,
+    "imageHeight" : 0,
+    "uploadFileQueryAPI" : null,
+    "uploadFileAPI" : null,
+    "uploadFileParam" : null
+}

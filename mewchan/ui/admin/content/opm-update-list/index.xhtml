@@ -1,0 +1,57 @@
+<div class="content bg-gray-lighter">
+    <div class="row items-push">
+        <div class="col-sm-7">
+            <h1 class="page-heading">
+                更新列表
+            </h1>
+        </div>
+        <div class="col-sm-5 text-right hidden-xs">
+            <button class="btn btn-success push-5-r push-10" type="button" tmpl:on-click="menuSwitch('opm-update-add')" style="float:right"><i class="fa fa-plus"></i> 增加更新</button>
+        </div>
+        
+    </div>
+</div>
+
+<div class="content">
+    <div class="block">
+        <div class="block-header">
+            <div class="block-options"></div>
+            <h3 class="block-title">更新列表</h3>
+        </div>
+        <div class="block-content">
+            <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="text-center" style="font-family:微软雅黑; width: 50px;">ID</th>
+                    <th class="text-center" style="font-family:微软雅黑; text-align: left;">名称</th>
+                    <th class="text-center" style="font-family:微软雅黑; width: 20%;">版本</th>
+                    <th class="text-center" style="font-family:微软雅黑; width: 20%;">状态</th>
+                    <th class="text-center" style="font-family:微软雅黑; width: 20%; text-align: right;"  >更新时间</th>
+                    <th class="text-center" style="font-family:微软雅黑; width: 50px;">操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <template:map list="if(menberList, menberList, [])" id-getter="{item.id}">
+                    <tr>
+                        <td class="text-center">${item.id}</td>
+                        <td class="text-center">${item.name}</td>
+                        <td class="text-center"><span class="label label-danger">${item.version}</span></td>
+                        <td class="text-center"><span class="label ${if(item.state == '上传Fir','label-danger','label-success')}">${item.state}</span></td>
+                        <td class="text-center" style="text-align: right;" >${if(item.updateTime,format('YYYY-MM-DD',date(item.updateTime)),'')}</td>
+                        <td>
+                            <button class="btn btn-xs " type="button"  style="float:right"><i class="fa fa-trash"></i>删除</button>
+                        </td>
+                    </tr>
+                </template:map>
+            </tbody>
+            </table>
+            <nav>
+                <ul class="pagination">
+                    <tmpl:map list="${seq(1,PageX)}">
+                          <li tmpl:on-click="selectPage()" class="${if(item == (pageIndex +1 ) ,'active','')}" ><a href="javascript:void(0)">${item}</a></li>
+                    </tmpl:map>
+                </ul>
+            </nav>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,229 @@
+<div class="content bg-gray-lighter">
+    <div class="row items-push">
+        <div class="col-sm-7">
+            <h1 class="page-heading">
+                ${appInfo.application.name}
+            </h1>
+        </div>
+        <div class="col-sm-5 text-right hidden-xs">
+            <ol class="breadcrumb push-10-t">
+                <li style="cursor:pointer;" tmpl:on-safe-click="goBackward()">返回应用列表</li>
+            </ol>
+        </div>
+    </div>
+    <form id="form-app-info" action="javascript:void(0)">
+        <div class="row">
+            <div class="block">
+                <div class="block-header">
+                    <h3 class="block-title">应用特性开关</h3>
+                </div>
+                <div class="block-content">
+                    <div class="row items-push">
+                        <div class="col-xs-6">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.enableRegister">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="enableRegister" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="enableRegister" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 允许用户注册
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row items-push">
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.mobilePhoneAsAccount">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="mobilePhoneAsAccount" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="mobilePhoneAsAccount" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 可以用手机登录
+                            </label>
+                        </div>
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.emailAsAccount">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="emailAsAccount" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="emailAsAccount" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 可以用邮箱登录
+                            </label>
+                        </div>
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.autoActivateAccount">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="autoActivateAccount" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="autoActivateAccount" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 自动激活账号
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row items-push">
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.canDulplicateNickname">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="canDulplicateNickname" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="canDulplicateNickname" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 允许重复昵称
+                            </label>
+                        </div>
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.enableResetPassword">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="enableResetPassword" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="enableResetPassword" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 允许重置密码
+                            </label>
+                        </div>
+
+                    </div>
+                    <div class="row items-push">
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.enableUserInfoExpose">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="enableUserInfoExpose" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="enableUserInfoExpose" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 允许通过接口访问用户信息
+                            </label>
+                        </div>
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.canSearchUserInfoByOpenID">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="canSearchUserInfoByOpenID" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="canSearchUserInfoByOpenID" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 允许通过openID获取用户信息
+                            </label>
+                        </div>
+                    </div>
+                    <div class="row items-push">
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.canUploadFiles">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="canUploadFiles" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="canUploadFiles" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 允许上传文件
+                            </label>
+                        </div>
+                        <div class="col-xs-4">
+                            <label class="css-input switch switch-default">
+                                <tmpl:switch condition="appInfo.isOnAppStore">
+                                    <tmpl:case value="'YES'">
+                                        <input type="checkbox" checked="checked" name="isOnAppStore" value="YES" />
+                                    </tmpl:case>
+                                    <tmpl:case>
+                                        <input type="checkbox" name="isOnAppStore" value="YES" />
+                                    </tmpl:case>
+                                </tmpl:switch>
+                                <span></span> 是否已经App Store上线
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="block">
+                <div class="block-header">
+                    <h3 class="block-title">应用特性选项</h3>
+                </div>
+                <div class="block-content">
+                    <div class="row items-push">
+                        <div class="col-xs-4">
+                            <div class="form-group">
+                                <label class="col-xs-12" for="example-select">推送供应商</label>
+                                <div class="col-sm-9">
+                                    <select class="form-control" id="push-service-vendor" name="pushServiceVendor" size="1">
+                                        <option value="NONE">不使用推送</option>
+                                        <option value="MIPUSH">使用米推作为推送</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+
+            </div>
+        </div>
+        <div class="row">
+            <div class="block">
+                <div class="block-content">
+                    <div class="row items-push">
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <button tmpl:on-click="saveAppInfo()" class="btn btn-sm btn-primary" type="submit">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                    <br style="clear:both" />
+                </div>
+            </div>
+
+        </div>
+        <div class="row">
+            <div class="block">
+                <div class="block-header">
+                    <h3 class="block-title">其他相关应用</h3>
+                </div>
+                <div class="block-content">
+                    <div class="col-sm-6 col-lg-3">
+                        <a tmpl:on-click="appSwitch('hestia-document-list')" class="block block-rounded block-link-hover3" href="javascript:void(0)">
+                            <div class="block-content block-content-full clearfix">
+                                <div class="pull-right">
+                                    <img class="img-avatar" src="/assets/img/avatars/avatar8.jpg" alt="" />
+                                </div>
+                                <div class="pull-left push-10-t">
+                                    <div class="font-w600 push-5">Hestia</div>
+                                    <div class="text-muted">文档索引管理</div>
+                                </div>
+                            </div>
+                        </a>
+                    </div>
+                    <br style="clear:both" />
+                </div>
+            </div>
+        </div>
+    </form>
+</div>

@@ -1,0 +1,50 @@
+<div id="sidebar-scroll">
+    <!-- Sidebar Content -->
+    <!-- Adding .sidebar-mini-hide to an element will hide it when the sidebar is in mini mode -->
+    <div class="sidebar-content">
+        <!-- Side Header -->
+        <div class="side-header side-content">
+            <!-- Layout API, functionality initialized in App() -> uiLayoutApi() -->
+            <button class="btn btn-link text-gray pull-right visible-xs visible-sm" tmpl:on-click="sidebarClose()" data-action="sidebar_close">
+                <i class="fa fa-times"></i>
+            </button>
+            <!-- Themes functionality initialized in App() -> uiHandleTheme() -->
+            <div class="btn-group pull-right visible-md visible-lg">
+                <button class="btn btn-link text-gray dropdown-toggle" data-toggle="dropdown" type="button">
+                    <i class="fa fa-gears"></i>
+                </button>
+                <ul class="dropdown-menu dropdown-menu-right font-s13 sidebar-mini-hide">
+                    <li tmpl:on-click="doLogout()">
+                        <a data-toggle="theme" data-theme="default" tabindex="-1">
+                            <i class="si si-logout text-default pull-right"></i>
+                            <span class="font-w600">
+                                <x:lang>登出</x:lang>
+                            </span>
+                        </a>
+                    </li>
+                </ul>
+            </div>
+            <a class="active h5 text-white" href="javascript:void(0)" tmpl:on-safe-click="goHomepage()">
+                ${application.name}
+            </a>
+        </div>
+        <!-- END Side Header -->
+
+        <!-- Side Content -->
+        <div class="side-content">
+            <ul class="nav-main">
+                <li >
+                    <a  class="${isActiveMenu('hestia-document-list','coolcto-app-list','coolcto-app-info')}" tmpl:on-click="menuSwitch('coolcto-app-list')" ><i class="si si-rocket"></i><span class="sidebar-mini-hide">CoolCTO App列表</span></a>
+                </li>
+                <li >
+                    <a  class="${isActiveMenu('opm-update-add','opm-update-list')}" tmpl:on-click="menuSwitch('opm-update-list')" ><i class="si si-rocket"></i><span class="sidebar-mini-hide">App发布管理</span></a>
+                </li>
+                <li >
+                    <a  class="${isActiveMenu('coolcto-cloud-admins')}" tmpl:on-click="menuSwitch('coolcto-cloud-admins')" ><i class="si si-rocket"></i><span class="sidebar-mini-hide">管理员列表</span></a>
+                </li>
+            </ul>
+        </div>
+        <!-- END Side Content -->
+    </div>
+    <!-- Sidebar Content -->
+</div>

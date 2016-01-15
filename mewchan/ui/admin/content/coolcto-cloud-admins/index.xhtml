@@ -1,0 +1,72 @@
+<div class="content bg-gray-lighter">
+    <div class="row items-push">
+        <div class="col-sm-7">
+            <h1 class="page-heading">
+                CoolCTO云管理员控制台
+            </h1>
+        </div>
+    </div>
+    <div class="row">
+        <tmpl:if test="${managers.length != 0}">
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>管理员UUID
+                            <button tmpl:on-click="addApp()" class="btn btn-xs btn-default" type="button" data-toggle="tooltip" title="" data-original-title="Edit Client"><i class="fa fa-plus"></i></button>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tmpl:map list="${managers}">
+                        <tr>
+                            <td>${item.uuid}</td>
+                        </tr>
+                    </tmpl:map>
+                </tbody>
+            </table>
+        </tmpl:if>
+    </div>
+</div>
+
+<x:viewLayer>
+    <div class="modal fade" tmpl:on-hidden.bs.modal="hideUploadModal()" id="modal-new-app" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-dialog-popout">
+            <div class="modal-content">
+                <div class="block block-themed block-transparent remove-margin-b">
+                    <div class="block-header bg-primary-dark">
+                        <ul class="block-options">
+                            <li>
+                                <button data-dismiss="modal" type="button"><i class="si si-close"></i></button>
+                            </li>
+                        </ul>
+                        <h3 class="block-title">添加新管理员</h3>
+                    </div>
+                    <div class="block-content block-content-narrow">
+                        <form class="form-horizontal push-10-t" id="form-new-app" action="javascript:void(0)" method="post" onsubmit="return false;">
+                            <div class="form-group">
+                                <div class="col-sm-9">
+                                    <div class="form-material">
+                                        <input class="form-control" type="text"  name="account" placeholder="请输入用户名" />
+                                        <label for="material-text">用户名</label>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <div class="col-sm-9">
+                                    <div class="form-material">
+                                        <input class="form-control" type="password"  name="password" placeholder="请输入密码" />
+                                        <label for="material-text">密码</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-sm btn-default" type="button" data-dismiss="modal">关闭</button>
+                    <button tmpl:on-click="saveCoolCTOUser()" class="btn btn-sm btn-primary" type="button" data-dismiss="modal"><i class="fa fa-check"></i>保存</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</x:viewLayer>

@@ -1,0 +1,111 @@
+<div class="content overflow-hidden">
+    <div class="row">
+        <div class="col-sm-8 col-sm-offset-2 col-md-6 col-md-offset-3 col-lg-4 col-lg-offset-4">
+            <!-- Register Block -->
+            <div class="block block-themed animated fadeIn">
+                <div class="block-header bg-success">
+                    <ul class="block-options">
+                        <li>
+                            <a tmpl:on-click="viewTerm()" >查看注册条款</a>
+                        </li>
+                        <li>
+                            <a tmpl:on-click="goBackward()" data-toggle="tooltip" data-placement="left" title="" data-original-title="Log In"><i class="si si-login"></i></a>
+                        </li>
+                    </ul>
+                    <h3 class="block-title"><x:lang>注册</x:lang></h3>
+                </div>
+                <div class="block-content block-content-full block-content-narrow">
+                    <!-- Register Title -->
+                    <h1 class="h2 font-w600 push-30-t push-5">${application.name}</h1>
+                    <p><x:lang>请填写以下表单完成新用户注册</x:lang></p>
+                    <!-- END Register Title -->
+
+                    <!-- Register Form -->
+                    <!-- jQuery Validation (.js-validation-register class is initialized in js/pages/base_pages_register.js) -->
+                    <!-- For more examples you can check out https://github.com/jzaefferer/jquery-validation -->
+                    <form tmpl:on-submit="onRegisterBtnClick()" id="form-register"  class="js-validation-register form-horizontal push-50-t push-50" action="javascript:void(0)" method="post" novalidate="novalidate">
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <div class="form-material form-material-success">
+                                    <input class="form-control" type="text" id="register-username" name="account" placeholder="请输入账号" />
+                                    <label for="register-username">账号</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <div class="form-material form-material-success">
+                                    <input class="form-control valid" type="email" id="register-email" name="mailAddress" placeholder="请输入邮箱" aria-required="true" aria-invalid="false" aria-describedby="register-email-error" />
+                                    <label for="register-email">邮箱</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <div class="form-material form-material-success">
+                                    <input class="form-control valid" type="password" id="register-password" name="password" placeholder="输入密码" aria-required="true" aria-invalid="false" aria-describedby="register-password-error" />
+                                    <label for="register-password">密码</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <div class="form-material form-material-success">
+                                    <input class="form-control" type="password" id="register-password2" name="passwordRpt" placeholder="确认密码" />
+                                    <label for="register-password2">确认密码</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12">
+                                <label class="css-input switch switch-sm switch-success">
+                                    <input type="checkbox" id="register-terms" name="register-terms"  /><span></span> <x:lang>我同意并接受</x:lang><a  tmpl:on-click="viewTerm()"  ><x:lang>注册条款</x:lang></a>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-xs-12 col-sm-6 col-md-5">
+                                <button class="btn btn-block btn-success" type="submit"><i class="fa fa-plus pull-right"></i><x:lang>注册</x:lang></button>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- END Register Form -->
+                </div>
+            </div>
+            <!-- END Register Block -->
+        </div>
+    </div>
+</div>
+
+<x:viewLayer>
+<div class="modal fade" tmpl:on-hidden.bs.modal="hideTerm()" id="modal-terms" tabindex="-1" role="dialog" >
+    <div class="modal-dialog modal-dialog-popout">
+        <div class="modal-content">
+            <div class="block block-themed block-transparent remove-margin-b">
+                <div class="block-header bg-primary-dark">
+                    <ul class="block-options">
+                        <li>
+                            <button data-dismiss="modal" type="button"><i class="si si-close"></i></button>
+                        </li>
+                    </ul>
+                    <h3 class="block-title">注册条款</h3>
+                </div>
+                <div class="block-content">
+                    <p>
+                        欢迎使用 ${application.name}, 请在遵守以下条款的基础上, 阅读并遵守本协议.
+                    </p>
+                    <p>本网站的包括但不限于应用程序、源代码、商标、标示图案(LOGO)、界面设计、应用程序编程接口(API)等所关联的所有知识产权均属本公司所有。用户不得复制、修改、传播或在非本网站所属的服务器上做镜像或者以其它方式进行非法使用。</p>
+                    <p>用户在使用本网站服务过程中，必须遵循以下规则：</p>
+                    <ul class="privacy-list" ><li>遵守中国有关的法律法规；</li><li>不得对本网站服务进行任何形式的对其他第三方的再授权使用、销售或转让；</li><li>不得为设计开发竞争产品对本网站进行任何形式的反向工程、反向编译、反汇编，或在竞争产品抄袭模仿本网站的设计；</li><li>不得滥用本网站的通信功能发送垃圾邮件和短信；</li><li>不得对本网站的连续服务和商誉构成损害的其他行为，包括对网站服务器的攻击；</li><li>遵守本协议中的全部约定。</li></ul>
+                    <p>用户不得利用 ${application.name} 服务制作、上载、复制、发布、传播或者转载如下内容：</p>
+                    <ul class="privacy-list" ><li>危害国家安全，泄露国家秘密，颠覆国家政权，破坏国家统一的；</li><li>损害国家荣誉和利益的；</li><li>煽动民族仇恨、民族歧视，破坏民族团结的；</li><li>破坏国家宗教政策，宣扬邪教和封建迷信的；</li><li>散布谣言，扰乱社会秩序，破坏社会稳定的；</li><li>散布淫秽、色情、赌博、暴力、凶杀、恐怖或者教唆犯罪的；</li><li>侮辱或者诽谤他人，侵害他人合法权益的；</li><li>含有法律、行政法规禁止的其他内容的信息。</li></ul>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-sm btn-default" type="button" data-dismiss="modal">关闭</button>
+                <button class="btn btn-sm btn-primary" type="button" data-dismiss="modal"><i class="fa fa-check"></i>我同意</button>
+            </div>
+        </div>
+    </div>
+</div>
+</x:viewLayer>

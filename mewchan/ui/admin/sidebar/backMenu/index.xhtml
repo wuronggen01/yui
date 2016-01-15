@@ -1,0 +1,44 @@
+<div id="sidebar-scroll">
+    <!-- Sidebar Content -->
+    <!-- Adding .sidebar-mini-hide to an element will hide it when the sidebar is in mini mode -->
+    <div class="sidebar-content">
+        <div class="side-header side-content">
+            <!-- Layout API, functionality initialized in App() -> uiLayoutApi() -->
+            <button class="btn btn-link text-gray pull-right visible-xs visible-sm" tmpl:on-click="sidebarClose()" data-action="sidebar_close">
+                <i class="fa fa-times"></i>
+            </button>
+            <!-- Themes functionality initialized in App() -> uiHandleTheme() -->
+            <!-- <div class="btn-group pull-right visible-md visible-lg">
+                <a tmpl:on-safe-click="hideMenu()"  >
+                    <button class="btn btn-link text-gray active"  type="button">
+                        <i class="fa fa-close"></i>
+                    </button>
+                </a>
+            </div> -->
+            <a class="active h5 text-white" href="javascript:void(0)" >
+                ${if(title,title,'编辑')}
+            </a>
+        </div>
+    </div>
+    <div class="side-content">
+        <ul class="nav-main">
+            <li>
+                <a tmpl:on-safe-click="backwardAction()" >
+                    <button class="btn btn-block btn-success" type="button">
+                        <i class="${if(icon,icon,'fa fa-save')}"></i>
+                        ${if(saveTitle,saveTitle,'保存')}
+                    </button>
+                </a>
+            </li>
+            <li>
+                <a tmpl:on-safe-click="cancelEdit()" >
+                    <button class="btn btn-block btn-default" type="button">
+                        <i class="si si-action-undo"></i>
+                        取消
+                    </button>
+                </a>
+            </li>
+        </ul>
+    </div>
+    <!-- Sidebar Content -->
+</div>

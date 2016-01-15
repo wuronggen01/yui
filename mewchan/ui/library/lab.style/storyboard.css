@@ -1,0 +1,18 @@
+.storyboard {
+  position: relative; }
+  .storyboard.storyboard-fixed-size > .storyboard-page {
+    position: absolute;
+    height: auto; }
+  .storyboard > .storyboard-page {
+    position: relative;
+    left: 0px;
+    top: 0px;
+    width: 100%;
+    pointer-events: none; }
+    .storyboard > .storyboard-page.storyboard-active {
+      position: relative;
+      pointer-events: auto; }
+
+#page-container.login {
+    background-color: #f5f5f5;
+}

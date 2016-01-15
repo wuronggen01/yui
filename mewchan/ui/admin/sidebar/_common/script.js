@@ -1,0 +1,7 @@
+
+
+module.exports = {
+    "didEnterForestage": function() {
+        
+    }
+}

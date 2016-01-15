@@ -1,0 +1,26 @@
+{
+	"menberList" : [{
+		"id" : 0,
+		"name" : "背包客App版",
+		"version"  : "0.0.5",
+		"fir" : "张三",
+		"file"  : "Icon.png",
+		"module"  : "增加"
+	},
+	{
+		"id" : 1,
+		"name" : "背包客IOS版",
+		"version"  : "0.0.5",
+		"fir" : "李四",
+		"file"  : "omp.png",
+		"module"  : "删除"
+	},
+	{
+		"id" : 2,
+		"name" : "洋农夫IOS版",
+		"version"  : "0.0.5",
+		"fir" : "李四",
+		"file"  : "qwe.png",
+		"module"  : "删除"
+	}]
+}

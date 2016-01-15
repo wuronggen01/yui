@@ -1,0 +1,62 @@
+<div class="content bg-gray-lighter">
+    <div class="row items-push">
+        <div class="col-sm-7">
+            <h1 class="page-heading">
+                请输入更新信息
+                <small>输入更新日期、版本、模块等信息!</small>
+            </h1>
+        </div>
+        <div class="col-sm-5 text-right hidden-xs">
+            <ol class="breadcrumb push-10-t">
+                <li>Generic</li>
+                <li><a class="link-effect" href="">Blank</a></li>
+            </ol>
+        </div>
+    </div>
+    <div class="block">
+                <div class="block-header">
+                    <ul class="block-options">
+                        <li>
+                            <button type="button"><i class="si si-settings"></i></button>
+                        </li>
+                    </ul>
+                    <h3 class="block-title">更新信息</h3>
+                </div>
+                <div class="block-content">
+                    <form class="form-horizontal"  id="form-record-edit" action="javascript:void(0)">
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" style="font-weight: normal;" for="example-masked-date2">名称</label>
+                            <div class="col-md-6">
+                                <input class="js-masked-date-dash form-control" type="text" id="name" name="name" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" style="font-weight: normal;" for="example-masked-phone">版本</label>
+                            <div class="col-md-6">
+                                <input class="js-masked-phone form-control" type="text" id="version" name="version" />
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" style="font-weight: normal;" for="example-masked-phone">状态</label>
+                            <div class="col-md-6">
+                            <select class="js-masked-phone form-control" id="state" name="state" size="1">
+                                    <option value="上传Fir">上传Fir</option>
+                                    <option value="发布AppStore">发布AppStore</option>
+                            </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label class="col-md-4 control-label" style="font-weight: normal;" for="example-textarea-input">更新内容</label>
+                            <div class="col-md-6">
+                                <textarea class="form-control" id="type" name="type" rows="6"></textarea>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-md-8 col-md-offset-4">
+                                <button class="btn btn-sm btn-primary" contenteditable="false"  tmpl:on-click="save()">提交</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+</div>

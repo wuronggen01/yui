@@ -1,0 +1,48 @@
+.storyboard-page {
+  height: 64px;
+  width: 100%;
+  background-color: #52D1A7; }
+
+#NavItemLeft {
+  z-index: 2;
+  position: relative;
+  float: left;
+  top: 13px;
+  left: 15px;
+  height: 22px;
+  width: 12px;
+  font-size: 22px; }
+
+#NavItemLeftBg {
+  position: absolute;
+  z-index: 3;
+  height: 100%;
+  width: 60px;
+  top: 0; }
+
+#NavigationBar {
+  position: relative;
+  padding-top: 15px;
+  height: 100%; }
+
+#NavItemRight {
+  z-index: 2;
+  position: relative;
+  float: right;
+  line-height: 51px;
+  text-align: center;
+  height: 40px;
+  width: 63px;
+  color: white;
+  font-size: 12px; }
+
+#NavItemCenter {
+  position: absolute;
+  z-index: 1;
+  line-height: 49px;
+  text-align: center;
+  height: 40px;
+  width: 100%;
+  color: white;
+  font-size: 17px;
+  letter-spacing: 0px; }

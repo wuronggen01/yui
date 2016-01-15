@@ -1,0 +1,170 @@
+<div class="content bg-image overflow-hidden" style="background-image: url('assets/img/photos/photo3@2x.jpg');">
+    <div class="push-50-t push-15">
+        <h1 class="h2 text-white animated zoomIn"><x:lang>仪表盘</x:lang></h1>
+        <h2 class="h5 text-white-op animated zoomIn">
+            <tmpl:if test="isTimePeriodHour(6,11)">
+                <x:lang>早上好，该开始工作了</x:lang>
+            </tmpl:if>
+            <tmpl:if test="isTimePeriodHour(11,13)">
+                <x:lang>中午好，该吃午饭了</x:lang>
+            </tmpl:if>
+            <tmpl:if test="isTimePeriodHour(13,17)">
+                <x:lang>下午好，该干活了</x:lang>
+            </tmpl:if>
+            <tmpl:if test="isTimePeriodHour(17,20)">
+                <x:lang>晚上好，又加班了吧？</x:lang>
+            </tmpl:if>
+            <tmpl:if test="isTimePeriodHour(20,0)">
+                <x:lang>深夜了，向作为劳模的你致敬！</x:lang>
+            </tmpl:if>
+            <tmpl:if test="isTimePeriodHour(0,6)">
+                <x:lang>深夜了，向作为劳模的你致敬！</x:lang>
+            </tmpl:if>
+        </h2>
+    </div>
+</div>
+<div class="content bg-white border-b">
+    <div class="row items-push text-uppercase">
+        <div class="col-xs-6 col-sm-3">
+            <div class="font-w700 text-gray-darker animated fadeIn"><x:lang>实时用户</x:lang></div>
+            <div class="text-muted animated fadeIn"><small><i class="si si-calendar"></i><x:lang>今日</x:lang></small></div>
+            <a class="h2 font-w300 text-primary animated flipInX" >${round(random()*10)+10}</a>
+        </div>
+        <div class="col-xs-6 col-sm-3">
+            <div class="font-w700 text-gray-darker animated fadeIn"><x:lang>访问数</x:lang></div>
+            <div class="text-muted animated fadeIn"><small><i class="si si-calendar"></i><x:lang>昨日</x:lang></small></div>
+            <a class="h2 font-w300 text-primary animated flipInX" >${round((timestamp()/1000/3600))%1000+1000}</a>
+        </div>
+        <div class="col-xs-6 col-sm-3">
+            <div class="font-w700 text-gray-darker animated fadeIn"><x:lang>收入</x:lang></div>
+            <div class="text-muted animated fadeIn"><small><i class="si si-calendar"></i><x:lang>今日</x:lang></small></div>
+            <a class="h2 font-w300 text-primary animated flipInX" >—</a>
+        </div>
+        <div class="col-xs-6 col-sm-3">
+            <div class="font-w700 text-gray-darker animated fadeIn"><x:lang>销售额</x:lang></div>
+            <div class="text-muted animated fadeIn"><small><i class="si si-calendar"></i><x:lang>所有时间</x:lang></small></div>
+            <a class="h2 font-w300 text-primary animated flipInX" >—</a>
+        </div>
+    </div>
+</div>
+
+<div class="content">
+    <div class="row">
+        <div class="block">
+            <div class="block-header bg-gray-lighter">
+                <ul class="block-options">
+                    <li>
+                        <button type="button" data-toggle="block-option" data-action="refresh_toggle" data-action-mode="demo"><i class="si si-refresh"></i></button>
+                    </li>
+                </ul>
+                <h3 class="block-title"><x:lang>活动日志</x:lang></h3>
+            </div>
+
+            <div class="block-content">
+                <ul class="list list-timeline pull-t">
+                    <li class="push-5">
+                        <div class="list-timeline-time">${application.lastUpdate}</div>
+                        <i class="fa fa-cog list-timeline-icon bg-primary-dark"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600 selectable" id="version-label" ><x:lang>系统升级至v${application.version}</x:lang></p>
+                            <p class="font-s13"></p>
+                        </div>
+                    </li>
+                    <!-- Twitter Notification -->
+                    <!-- <li>
+                        <div class="list-timeline-time">12 hrs ago</div>
+                        <i class="fa fa-twitter list-timeline-icon bg-info"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600">+ 1150 Followers</p>
+                            <p class="font-s13">You’re getting more and more followers, keep it up!</p>
+                        </div>
+                    </li> -->
+                    <!-- END Twitter Notification -->
+
+                    <!-- Generic Notification -->
+                    <!-- <li>
+                        <div class="list-timeline-time">4 hrs ago</div>
+                        <i class="fa fa-briefcase list-timeline-icon bg-city"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600">+ 3 New Products were added!</p>
+                            <p class="font-s13">Congratulations!</p>
+                        </div>
+                    </li> -->
+                    <!-- END Generic Notification -->
+
+                    <!-- System Notification -->
+                    <!-- <li>
+                        <div class="list-timeline-time">1 day ago</div>
+                        <i class="fa fa-check list-timeline-icon bg-success"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600">Database backup completed!</p>
+                            <p class="font-s13">Download the <a href="javascript:void(0)">latest backup</a>.</p>
+                        </div>
+                    </li> -->
+                    <!-- END System Notification -->
+
+                    <!-- Facebook Notification -->
+                    <!-- <li>
+                        <div class="list-timeline-time">3 hrs ago</div>
+                        <i class="fa fa-facebook list-timeline-icon bg-default"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600">+ 290 Page Likes</p>
+                            <p class="font-s13">This is great, keep it up!</p>
+                        </div>
+                    </li> -->
+                    <!-- END Facebook Notification -->
+
+                    <!-- Social Notification -->
+                    <!-- <li>
+                        <div class="list-timeline-time">2 days ago</div>
+                        <i class="fa fa-user-plus list-timeline-icon bg-modern"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600">+ 3 Friend Requests</p>
+                            <ul class="nav-users push-10-t push">
+                                <li>
+                                    <a href="base_pages_profile.html">
+                                        <img class="img-avatar" src="assets/img/avatars/avatar11.jpg" alt="" />
+                                        <i class="fa fa-circle text-success"></i> Eric Lawson
+                                        <div class="font-w400 text-muted">
+                                            <small>Graphic Designer</small>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="base_pages_profile.html">
+                                        <img class="img-avatar" src="assets/img/avatars/avatar4.jpg" alt="" />
+                                        <i class="fa fa-circle text-warning"></i> Emma Cooper
+                                        <div class="font-w400 text-muted">
+                                            <small>Photographer</small>
+                                        </div>
+                                    </a>
+                                </li>
+                                <li>
+                                    <a href="base_pages_profile.html">
+                                        <img class="img-avatar" src="assets/img/avatars/avatar10.jpg" alt="" />
+                                        <i class="fa fa-circle text-danger"></i> Jack Greene
+                                        <div class="font-w400 text-muted">
+                                            <small>UI Designer</small>
+                                        </div>
+                                    </a>
+                                </li>
+                            </ul>
+                        </div>
+                    </li> -->
+                    <!-- END Social Notification -->
+
+                    <!-- System Notification -->
+                    <!-- <li class="push-5">
+                        <div class="list-timeline-time">1 week ago</div>
+                        <i class="fa fa-cog list-timeline-icon bg-primary-dark"></i>
+                        <div class="list-timeline-content">
+                            <p class="font-w600">System updated to v2.02</p>
+                            <p class="font-s13">Check the complete changelog at the <a href="javascript:void(0)">activity page</a>.</p>
+                        </div>
+                    </li> -->
+                    <!-- END System Notification -->
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>

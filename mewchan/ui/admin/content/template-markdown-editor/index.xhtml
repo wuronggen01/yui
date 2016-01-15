@@ -1,0 +1,63 @@
+<div style="height:${env('viewport.height')- padding }px; width : 100%;overflow:hidden;">
+    <div id="editor-wrapper">
+        <textarea id="editor" style="width: 100%;height:${env('viewport.height') - padding}px;" class="editor" name="${if(name,name,'content')}">${content}</textarea>
+    </div>
+</div>
+
+<x:viewLayer tmpl:on-ready="initUploadModal()" >
+    <div class="modal fade" tmpl:on-hidden.bs.modal="hideUploadModal()" id="modal-upload" tabindex="-1" role="dialog">
+        <div class="modal-dialog modal-lg modal-dialog-popout">
+            <div class="modal-content">
+                <div class="block block-themed block-transparent remove-margin-b">
+                    <div class="block-header bg-primary-dark">
+                        <ul class="block-options">
+                            <li>
+                                <button data-dismiss="modal" type="button"><i class="si si-close"></i></button>
+                            </li>
+                        </ul>
+                        <h3 class="block-title">上传图片</h3>
+                    </div>
+
+                </div>
+                <div class="block">
+                    <ul class="nav nav-tabs nav-tabs-alt">
+                        <li class="active" tmpl:on-click="switchUploadModalTab('btabs-upload-dropzone')">
+                            <a >直接上传</a>
+                        </li>
+                        <li class="" tmpl:on-click="switchUploadModalTab('btabs-upload-gallery')" >
+                            <a >从相册中选择</a>
+                        </li>
+                    </ul>
+                    <div class="block-content tab-content">
+                        <div class="tab-pane active" id="btabs-upload-dropzone">
+                            <div class="block-content block-content-full">
+                                <form class="dropzone" action="javascript:void(0)"></form>
+                            </div>
+                        </div>
+                        <div class="tab-pane" id="btabs-upload-gallery">
+                            <div class="row js-gallery waterfall" >
+                                <tmpl:map list="seq(1,maxColumn)" id-getter="{item}"  >
+                                    <div class="col-sm-${12/maxColumn}">
+                                        <tmpl:map list="if(gallery,gallery,[])" id-getter="{gitem.id}" item-variant-name="gitem" index-variant-name="gindex"  >
+
+                                                <tmpl:if test="${gindex%maxColumn==index}" >
+                                                    <a class="img-link img-thumb" tmpl:on-click="onGalleryModalSelection(gitem)"  >
+                                                        <img class="img-responsive" src="${gitem.linkURL}" alt="" />
+                                                    </a>
+                                                </tmpl:if>
+
+                                        </tmpl:map>
+                                        </div>
+                                </tmpl:map>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn btn-sm btn-default" type="button" data-dismiss="modal">关闭</button>
+                    <button class="btn btn-sm btn-primary" type="button" tmpl:on-click="confirmUploadModal()"><i class="fa fa-check"></i>确定</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</x:viewLayer>

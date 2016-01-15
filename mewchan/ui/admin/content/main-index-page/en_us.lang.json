@@ -1,0 +1,19 @@
+{
+	"仪表盘" : "Dashboard" ,
+	"刚刚" : "just now"  ,
+	"系统升级至v${application.version}" : "System updated to v${application.version}" ,
+	"早上好，该开始工作了" : "Good morning my friend, let your smile change the world" ,
+	"中午好，该吃午饭了" : "Good noon, wish you get refilled after a pleasant meal" ,
+	"下午好，该干活了" : "Good afternoon, when friendship is your greatest weakness, you will be the strongest person in the world" ,
+	"晚上好，又加班了吧？" : "Good evening, like a night without starlight, so is a life without love" ,
+	"深夜了，向作为劳模的你致敬！" : "Good night, are you still there working, take care my friend" ,
+	"活动日志" : "Activity" ,
+	"上证指数" : "SSE Composite Index" ,
+	"今日" : "Today" ,
+	"实时用户" : "Realtime visits" ,
+	"访问数" : "Visits" ,
+	"昨日" : "Yesterday" ,
+	"收入" : "Income" ,
+	"销售额" : "Sales" ,
+	"所有时间" : "ALL Time" 
+}

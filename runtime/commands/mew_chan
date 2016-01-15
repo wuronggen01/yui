@@ -1,0 +1,2127 @@
+#!/usr/bin/env mew_js
+
+var fs = require("fs");
+var path = require("path");
+
+var mewUtil = require("mew_util");
+
+var help = false;
+var version = false;
+
+var chanPath = process.cwd();
+
+var logLevel = null;
+var logStyle = null;
+var logSupportMultipleLine = null;
+
+var command = null;
+var commandArguments = [];
+
+var invalidSwitches = [];
+
+var packageName = null;
+var packageAuthor = null;
+var packageVersion = null;
+var packageBuild = null;
+var packageDescription = null;
+var packageCompany = null;
+var packageWebsite = null;
+var scriptInitialFile = null;
+var scriptPostprocess = null;
+var exportFile = null;
+var combinedScriptFile = null;
+var executableFile = null;
+var licenseFile = null;
+var readmeFile = null;
+var rsaKeyFile = null;
+var rsaKeyHash = null;
+var rsaCertFile = null;
+var signerType = null;
+var blockAlgorithm = null;
+var terminalOutputType = null;
+
+process.argv.slice(2).forEach(function (argument) {
+
+    switch (argument.split("=")[0]) {
+
+        case "--help": { help = true; break; }
+        case "--version": { version = true; break; }
+
+        case "--log-level": { logLevel = argument.split("=").slice(1).join("="); break; }
+        case "--log-style": { logStyle = argument.split("=").slice(1).join("="); break; }
+        case "--log-support-multiple-line": { logSupportMultipleLine = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        case "--package-name": { packageName = argument.split("=").slice(1).join("="); break; }
+        case "--package-author": { packageAuthor = argument.split("=").slice(1).join("="); break; }
+        case "--package-version": { packageVersion = argument.split("=").slice(1).join("="); break; }
+        case "--package-build": { packageBuild = argument.split("=").slice(1).join("="); break; }
+        case "--package-description": { packageDescription = argument.split("=").slice(1).join("="); break; }
+        case "--package-company": { packageCompany = argument.split("=").slice(1).join("="); break; }
+        case "--package-website": { packageWebsite = argument.split("=").slice(1).join("="); break; }
+
+        case "--script-initial-file": { scriptInitialFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+        case "--script-postprocess": { scriptPostprocess = argument.split("=").slice(1).join("="); break; }
+        case "--export-file": { exportFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+        case "--combined-script-file": { combinedScriptFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+        case "--executable-file": { executableFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+        case "--license-file": { licenseFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+        case "--readme-file": { readmeFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+
+        case "--rsa-key-file": { rsaKeyFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+        case "--rsa-key-hash": { rsaKeyHash = argument.split("=").slice(1).join("="); break; }
+        case "--rsa-cert-file": { rsaCertFile = path.resolve(argument.split("=").slice(1).join("=")); break; }
+
+        case "--signer-type": { signerType = parseInt(argument.split("=").slice(1).join("=")); break; }
+        case "--block-algorithm": { blockAlgorithm = argument.split("=").slice(1).join("="); break; }
+        case "--terminal-output-type": { terminalOutputType = argument.split("=").slice(1).join("="); break; }
+
+        default: { 
+
+            if (!command) {
+
+                if ([
+                    "config", "scan", "confirm", "package", "combine", /*"compile", */"run",
+                    "info", "license", "readme", "extract", "verify", "resource", "file"].indexOf(argument) !== -1) {
+                    command = argument;
+                } else {
+                    invalidSwitches.push(argument);
+                }
+
+            } else {
+
+                if (argument.substring(0, 2) === "--") {
+                    invalidSwitches.push(argument);
+                } else {
+                    commandArguments.push(argument);
+                }
+
+            }
+
+            break; 
+        }
+
+    }
+
+});
+
+if (!isFinite(signerType)) {
+    signerType = null;
+}
+
+if (!command) {
+    command = "package";
+}
+
+var commands = {};
+
+commands["package"] = function (logger) {
+
+    logger.info("Started to generate config for chan package");
+
+    commands["scan"](logger, true, function (options, callback) {
+
+        mewUtil.async(function () {
+
+            options.noMoreMergeOptions = true;
+
+            options.reportProgress = function (level, message) {
+                logger[level](message);
+            };
+
+            this.next();
+
+        }).then(function () {
+
+            fs.exists(path.resolve(chanPath, "lib"), (function (exists) {
+
+                if (exists) {
+
+                    fs.readdir(path.resolve(chanPath, "lib"), (function (error, list) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+
+                            this.pool.chanFiles = list.filter(function (item) {
+                                return /^[^\.].+\.chan$/.test(item);
+                            });
+
+                            this.next();
+
+                        }
+
+                    }).bind(this));
+
+                } else {
+
+                    this.pool.chanFiles = [];
+
+                    this.next();
+                }
+
+            }).bind(this));
+
+        }).all("chanFiles", function (chanFile) {
+
+            var step = this;
+
+            mewUtil.getChanPackage(path.resolve(chanPath, "lib", chanFile), {}).ready(function (chan) {
+
+                chan.listAllScriptResourceFiles().then(function (files) {
+
+                    mewUtil.async.all(files, function (file) {
+
+                        fs.exists(path.resolve(chanPath, file), (function (exists) {
+
+                            if (!exists) {
+
+                                chan.readFile(file).then(function (content) {
+
+                                    var index = options.scriptFiles.indexOf(file);
+                                    if (index !== -1) {
+                                        options.scriptFiles.splice(index, 1);
+                                    }
+
+                                    options.scriptFiles.push({
+                                        "path": file,
+                                        "content": content.toString("utf8")
+                                    });
+
+                                    this.next();
+
+                                }).then(this.next).rejected(this.reject);
+
+                            } else {
+                                this.next();
+                            }
+
+                        }).bind(this));
+
+                    }).then(this.next).rejected(this.reject);
+
+                }).then(function () {
+
+                    chan.listAllResourceFiles().then(function (files) {
+
+                        this.pool.files = files;
+
+                        this.next();
+
+                    }).all("files", function (file) {
+
+                        fs.exists(path.resolve(chanPath, file), (function (exists) {
+
+                            if (!exists) {
+
+                                if (!options.resourceFiles[file]) {
+                                    options.resourceFiles[file] = {};
+                                }
+
+                                delete options.resourceFiles[file].notConfirmed;
+                                delete options.resourceFiles[file].dropped;
+
+                                chan.fileInfo(file).then(function (info) {
+
+                                    options.resourceFiles[file].fileSize = info.fileSize;
+                                    options.resourceFiles[file].createdDate = info.createdDate;
+                                    options.resourceFiles[file].lastModifiedDate = info.lastModifiedDate;
+                                    options.resourceFiles[file].noCompress = !info.compressed;
+
+                                    this.next();
+
+                                }).then(function () {
+
+                                    chan.createReadStream(file).then(function (readStream) {
+
+                                        options.resourceFiles[file].content = readStream;
+
+                                        this.next();
+
+                                    }).then(this.next).rejected(this.reject);
+
+                                }).then(this.next).rejected(this.reject);
+
+                            } else {
+                                this.next();
+                            }
+
+                        }).bind(this));
+
+                    }).then(step.next).rejected(step.reject);
+
+                }).then(this.next).rejected(this.reject);
+
+            }).rejected(this.reject);
+
+        }).then(function () {
+
+            mewUtil.generateChanPackage(chanPath, options, function (error, exportPath) {
+
+                if (error) {
+                    callback(error);
+                } else {
+
+                    logger.celebr("Chan package has been generated at " + exportPath);
+
+                    callback();
+                }
+
+            });
+
+        }).rejected(function (error) {
+            callback(error);
+        });
+
+    });
+
+};
+
+commands["config"] = function (logger, noOverwriteConfig, next) {
+
+    mewUtil.async(function () {
+
+        if (rsaKeyFile) {
+
+            fs.readFile(rsaKeyFile, (function (error, buffer) {
+
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("UTF-8"));
+                }
+
+            }).bind(this));
+
+        } else {
+            this.next(null);
+        }
+
+    }).then(function (rsaKey) {
+
+        var options = {
+
+            "name": packageName,
+            "description": packageDescription,
+
+            "version": packageVersion,
+            "build": packageBuild,
+
+            "author": packageAuthor,
+            "company": packageCompany,
+
+            "website" : packageWebsite,
+
+            "scriptInitialFile": scriptInitialFile,
+            "scriptPostprocess": scriptPostprocess,
+
+            "rsaKey": rsaKey,
+
+            "signerType": signerType,
+            "blockAlgorithm": blockAlgorithm,
+
+            "exportFile": exportFile,
+            "combinedScriptFile": combinedScriptFile,
+            "executableFile": executableFile,
+
+            "licenseFile": licenseFile,
+            "readmeFile": readmeFile
+
+        };
+
+        [
+            "scriptInitialFile", 
+            "exportFile", "combinedScriptFile", "executableFile", 
+            "licenseFile", "readmeFile"].forEach(function (key) {
+            if (options[key]) {
+                options[key] = path.relative(chanPath, options[key]);
+            }
+        });
+
+        Object.keys(options).forEach(function (key) {
+            if (options[key]) {
+                logger.info("Update chan " + key.replace(/[A-Z]/g, function (character) {
+                    return " " + character.toLowerCase();
+                }) + " config");
+            }
+        });
+
+        mewUtil.getUtilConfig("chan", null, options, this.next);
+
+    }).then(function (options) {
+
+        this.pool.options = options;
+
+        mewUtil.makeDir(path.resolve(chanPath, "conf"), (function (error) {
+
+            if (error) {
+                this.reject(error);
+            } else {
+                this.next();
+            }
+
+        }).bind(this));
+
+    }).then(function () {
+
+        if (next) {
+
+            next(this.pool.options, (function (error, options) { 
+
+                if (error) {
+                    this.reject(error);
+                } else {
+
+                    this.pool.options = options;
+
+                    this.next();
+
+                }
+
+            }).bind(this));
+
+        } else {
+            this.next();
+        }
+
+    }).then(function () {
+
+        if (!noOverwriteConfig) {
+
+            var options = mewUtil.merge(this.pool.options);
+
+            delete options.rsaKey;
+
+            [
+                "resourceIgnoreFilters", "resourceFilters",
+                "scriptIgnoreFilters", "scriptFilters",
+                "autocompressResourceFiles", 
+                "noStripScriptResourceFiles"
+            ].forEach(function (key) {
+                if (options[key]) {
+                    options[key] = options[key].map(function (regex) {
+                        return regex.fromString;
+                    }).filter(function (source) {
+                        return source && (source.length > 0);
+                    });
+                }
+            });
+
+            fs.writeFile(path.resolve(chanPath, "conf/chan.json"), JSON.stringify(options, null, 4), (function (error) {
+
+                if (error) {
+                    this.reject(error);
+                } else {
+
+                    logger.celebr("Chan config has been updated at " + path.resolve(chanPath, "conf/chan.json"));
+
+                    this.next();
+                }
+
+            }).bind(this));
+
+        } else {
+            this.next();
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+ 
+    });
+
+};
+
+commands["scan"] = function (logger, noOverwriteConfig, next) {
+
+    commands["config"](logger, noOverwriteConfig, function (options, callback) {
+
+        mewUtil.async(function () {
+
+            var testFileAcceptable = function (path) {
+
+                var ignoreFilters = options.resourceIgnoreFilters.slice(0);
+                if (options.ignoreDotPrefixedResourceFiles) {
+                    ignoreFilters.push(/(^|[\\\/])\./g);
+                }
+
+                ignoreFilters.push(/^lib[\\\/][^\\\/]+\.chan$/gi);
+
+                var failed = false;
+                ignoreFilters.forEach(function (filter) {
+                    failed = failed || filter.test(path);
+                });
+
+                options.resourceFilters.forEach(function (filter) {
+                    failed = failed && (!filter.test(path));
+                });
+
+                return !failed;
+
+            };
+
+            mewUtil.scanFile(chanPath, -1, function (record) {
+                return testFileAcceptable(path.relative(chanPath, record.path));
+            }, (function (files) {
+
+                var resourceFiles = files.filter(function (file) {
+                    return (file.type === "file");
+                });
+
+                var scriptFiles = files.filter(function (file) {
+
+                    if (!/\.js(on)?$/gi.test(file.path)) {
+                        return false;
+                    } else {
+
+                        var failed = false;
+                        options.scriptIgnoreFilters.forEach(function (filter) {
+                            failed = failed || filter.test(file.path);
+                        });
+
+                        options.scriptFilters.forEach(function (filter) {
+                            failed = failed && (!filter.test(file.path));
+                        });
+
+                        return !failed;
+
+                    }
+
+                }).map(function (file) {
+                    return mewUtil.ensurePosixPath(file.path);
+                });
+
+                var notFoundResourceFiles = Object.keys(options.resourceFiles).map(function (filePath) {
+                    return mewUtil.ensurePosixPath(filePath);
+                });
+
+                var notFoundScriptFiles = options.scriptFiles.slice(0).map(function (filePath) {
+                    return mewUtil.ensurePosixPath(filePath);
+                });
+
+                resourceFiles.forEach(function (file) {
+
+                    var found = false;
+
+                    var posixFilePath = mewUtil.ensurePosixPath(file.path); 
+
+                    var index = notFoundResourceFiles.indexOf(posixFilePath);
+                    if (index !== -1) {
+                        notFoundResourceFiles.splice(index, 1);
+                    }
+
+                    if (!options.resourceFiles[posixFilePath]) {
+
+                        found = true;
+
+                        options.resourceFiles[posixFilePath] = {
+                            "notConfirmed": true 
+                        };
+
+                    } else {
+
+                        if (options.resourceFiles[posixFilePath].dropped) {
+
+                            found = true;
+
+                            delete options.resourceFiles[posixFilePath].dropped;
+
+                        }
+
+                    }
+
+                    if (scriptFiles.indexOf(posixFilePath) !== -1) {
+
+                        var index = notFoundScriptFiles.indexOf(posixFilePath);
+                        if (index !== -1) {
+                            notFoundScriptFiles.splice(index, 1);
+                        }
+
+                        var index = options.droppedScriptFiles.indexOf(posixFilePath);
+                        if (index !== -1) {
+                            options.droppedScriptFiles.splice(index, 1);
+                        }
+
+                        if (options.scriptFiles.indexOf(posixFilePath) === -1) {
+
+                            found = false;
+
+                            logger[noOverwriteConfig ? "warn" : "info"]("Added script file " + posixFilePath);
+
+                            options.scriptFiles.push(posixFilePath);
+
+                        }
+
+                    }
+
+                    if (found) {
+                        logger[noOverwriteConfig ? "warn" : "info"]("Added resource file " + posixFilePath);
+                    }
+
+                });
+
+                notFoundScriptFiles.forEach(function (filePath) {
+
+                    if (options.droppedScriptFiles.indexOf(filePath) === -1) {
+
+                        if (options.resourceFiles[filePath].notConfirmed) {
+                            logger.warn("Dropped not confirmed script file " + filePath);
+                        } else {
+                            logger.warn("Dropped script file " + filePath);
+                            options.droppedScriptFiles.push(filePath);
+                        }
+
+                    }
+
+                    var index = options.scriptFiles.indexOf(filePath);
+                    if (index !== -1) {
+                        options.scriptFiles.splice(index, 1);
+                    }
+
+                });
+
+                notFoundResourceFiles.forEach(function (filePath) {
+
+                    if (!options.resourceFiles[filePath].dropped) {
+
+                        options.resourceFiles[filePath].dropped = true;
+
+                        if (notFoundScriptFiles.indexOf(filePath) === -1) {
+                            if (options.resourceFiles[filePath].notConfirmed) {
+                                logger.warn("Dropped not confirmed resource file " + filePath);
+                            } else {
+                                logger.warn("Dropped resource file " + filePath);
+                            }
+                        }
+
+                    }
+
+                    if (options.resourceFiles[filePath].notConfirmed) {
+                        delete options.resourceFiles[filePath];
+                    }
+
+                });
+
+                options.droppedScriptFiles = options.droppedScriptFiles.filter(function (filePath) {
+                    return (options.resourceFiles[filePath] ? true : false);
+                });
+
+                this.next();
+
+            }).bind(this));
+
+        }).then(function () {
+
+            if (next) {
+
+                next(options, (function (error) {
+
+                    if (error) {
+                        callback(error);
+                    } else {
+                        callback(null, options);
+                    }
+
+                    this.next();
+
+                }).bind(this));
+
+            } else {
+
+                callback(null, options); 
+
+                this.next();
+
+            }
+
+        }).rejected(function (error) {
+            callback(error);
+        });
+
+    });
+
+};
+
+commands["confirm"] = function (logger) {
+
+    logger.info("Started to confirm config for chan package");
+
+    var configPath = path.resolve(chanPath, "conf/chan.json");
+    mewUtil.async(function () {
+
+        fs.exists(configPath, (function (exists) {
+
+            if (exists) {
+                this.next();
+            } else {
+                this.reject(new Error("No chan config file found at " + configPath));
+            }
+
+        }).bind(this));
+
+    }).then(function () {
+
+        fs.readFile(configPath, (function (error, buffer) {
+
+            if (error) {
+                this.reject(error);
+            } else {
+
+                var json = null;
+                try {
+                    json = JSON.parse(buffer.toString("utf8"));
+                } catch (error) {
+                    this.reject(error); return;
+                }
+
+                this.next(json);
+
+            }
+
+        }).bind(this));
+
+    }).then(function (options) {
+
+        options.droppedScriptFiles.forEach(function (scriptFile) {
+            logger.info("Dropped script file " + scriptFile);
+        });
+
+        options.droppedScriptFiles = [];
+
+        Object.keys(options.resourceFiles).forEach(function (resourceFile) {
+
+            if (options.resourceFiles[resourceFile].dropped) {
+                logger.info("Dropped resource file " + resourceFile);
+                delete options.resourceFiles[resourceFile];
+            } else if (options.resourceFiles[resourceFile].notConfirmed) {
+                logger.info("Confirmed resource file " + resourceFile);
+                delete options.resourceFiles[resourceFile].notConfirmed;
+            }
+
+        });
+
+        fs.writeFile(configPath, JSON.stringify(options, null, 4), (function (error) {
+
+            if (error) {
+                this.reject(error);
+            } else {
+
+                logger.celebr("New config file has been generated at " + configPath);
+
+                this.next();
+            }
+
+        }).bind(this));
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["combine"] = function (logger) {
+
+    commands["scan"](logger, true, function (options, callback) {
+
+        mewUtil.async(function () {
+
+            fs.exists(path.resolve(chanPath, "lib"), (function (exists) {
+
+                if (exists) {
+
+                    fs.readdir(path.resolve(chanPath, "lib"), (function (error, list) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+
+                            this.pool.chanFiles = list.filter(function (item) {
+                                return /^[^\.].+\.chan$/.test(item);
+                            });
+
+                            this.next();
+
+                        }
+
+                    }).bind(this));
+
+                } else {
+
+                    this.pool.chanFiles = [];
+
+                    this.next();
+                }
+
+            }).bind(this));
+
+        }).all("chanFiles", function (chanFile) {
+
+            var step = this;
+
+            mewUtil.getChanPackage(path.resolve(chanPath, "lib", chanFile), {}).ready(function (chan) {
+
+                chan.listAllScriptResourceFiles().then(function (files) {
+
+                    mewUtil.async.all(files, function (file) {
+
+                        fs.exists(path.resolve(chanPath, file), (function (exists) {
+
+                            if (!exists) {
+
+                                chan.readFile(file).then(function (content) {
+
+                                    var index = options.scriptFiles.indexOf(file);
+                                    if (index !== -1) {
+                                        options.scriptFiles.splice(index, 1);
+                                    }
+
+                                    options.scriptFiles.push({
+                                        "path": file,
+                                        "content": content.toString("utf8")
+                                    });
+
+                                    this.next();
+
+                                }).then(this.next).rejected(this.reject);
+
+                            } else {
+                                this.next();
+                            }
+
+                        }).bind(this));
+
+                    }).then(this.next).rejected(this.reject);
+
+                }).then(step.next).rejected(this.reject);
+
+            }).rejected(this.reject);
+
+        }).then(function () {
+
+            var scriptFiles = [];
+
+            options.scriptFiles.forEach(function (scriptFile) {
+                if (mewUtil.isKindOf(scriptFile, String)) {
+                    scriptFiles.push({
+                        "path": scriptFile,
+                        "notConfirmed": options.resourceFiles[scriptFile].notConfirmed
+                    });
+                } else {
+                    scriptFiles.push({
+                        "path": scriptFile.path,
+                        "content": scriptFile.content,
+                        "notConfirmed": scriptFile.notConfirmed | options.resourceFiles[scriptFile].notConfirmed
+                    });
+                }
+            });
+
+            mewUtil.combineJSFiles(scriptFiles, {
+                "basePath": path.resolve(chanPath, options.scriptBasePath),
+                "initialFile": options.scriptInitialFile,
+                "reportProgress": function (level, message) {
+                    logger[level](message);
+                }
+            }, (function (error, js, fsKeys) {
+
+                if (error) {
+
+                    this.reject(error);
+
+                } else {
+
+                    this.pool.fsKeys = fsKeys;
+
+                    if (options.scriptPostprocess) {
+
+                        var action = options.scriptPostprocess.split("@")[0];
+                        var file = options.scriptPostprocess.split("@").slice(1).join("@");
+
+                        var postprocessModule = null;
+                        try {
+                            postprocessModule = require(path.resolve(chanPath, file));
+                        } catch (error) {
+                            this.reject(error); return;
+                        }
+
+                        postprocessModule[action](js, (function (error, js) {
+
+                            if (error) {
+                                this.reject(error);
+                            } else {
+                                this.next(js);
+                            }
+
+                        }).bind(this));
+
+                    } else {
+                        this.next(js);
+                    }
+
+                }
+
+            }).bind(this));
+
+        }).then(function (js) {
+
+            var exportPath = path.resolve(options.combinedScriptFile);
+
+            fs.writeFile(exportPath, new Buffer(js, "utf8"), (function (error) {
+
+                if (error) {
+                    this.reject(error);
+                } else {
+
+                    logger.celebr("Scripts has been combined at " + exportPath);
+
+                    this.next();
+
+                }
+
+            }).bind(this));
+
+        }).rejected(function (error) {
+
+            logger.error(error);
+
+            process.exit(-1);
+     
+        });
+
+    });
+
+};
+
+// commands["compile"] = function (logger) {
+
+// };
+
+commands["run"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        chan.require();
+
+        this.next();
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["info"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        switch (terminalOutputType) {
+
+            case "json": {
+
+                logger.output(JSON.stringify(chan.info, null, 4));
+                
+                break;
+            }
+
+            case "json-stripped": {
+
+                logger.output(JSON.stringify(chan.info));
+
+                break;
+            }
+
+            case "verbose":
+            default: {
+
+                var info = chan.info;
+
+                logger.output("");
+                logger.output("Chan package information: ");
+                logger.output("--------------------------------------------------------------------------------");
+                logger.output("");
+
+                var list = [
+                    "name", "version", "build", "", 
+                    "createdDate", "",
+                    "path", "chanVersion", "state", "",
+                    "author", "company", "",
+                    "website", "",
+                    "description", 
+                ];
+
+                if (info.author === info.company) {
+                    list.splice(list.indexOf("author"), 1);
+                }
+
+                list.forEach(function (key) {
+
+                    if (key) {
+
+                        if (info[key]) {
+
+                            var outputKey = key.replace(/(^[a-z])|[A-Z]/g, function (character) {
+                                if (character=== character.toLowerCase()) {
+                                    return character.toUpperCase();
+                                } else {
+                                    return " " + character;
+                                }
+                            });
+
+                            while (outputKey.length < 14) {
+                                outputKey = " " + outputKey;
+                            }
+
+                            if (key === "state") {
+                                if (info[key] !== "loaded") {
+                                    logger.output(outputKey + ": " + info[key].toUpperCase());
+                                } else {
+                                    logger.output(outputKey + ": VALID");
+                                }
+                            } else if (key === "createdDate") {
+                                logger.output(outputKey + ": " + mewUtil.formatDate(info[key], "YYYY-MM-DD hh:mm:ss.SSS"));
+                            } else {
+                                logger.output(outputKey + ": " + info[key]);
+                            }
+
+                        }
+
+                    } else {
+                        logger.output("");
+                    }
+
+                });
+
+                logger.output("");
+
+                break;
+            }
+
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["license"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        this.pool.chan = chan;
+
+        chan.getLicense().then(this.next).rejected(this.reject);
+
+    }).then(function (license) {
+
+        switch (terminalOutputType) {
+
+            case "json": {
+
+                logger.output(JSON.stringify(license, null, 4));
+                
+                break;
+            }
+
+            case "json-stripped": {
+
+                logger.output(JSON.stringify(license));
+
+                break;
+            }
+
+            case "verbose":
+            default: {
+
+                logger.output("");
+                logger.output("Chan package license for " + this.pool.chan.name + ":");
+                logger.output("--------------------------------------------------------------------------------");
+                logger.output("");
+                logger.output(license);
+                logger.output("");
+
+                break;
+            }
+
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["readme"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        this.pool.chan = chan;
+
+        chan.getReadme().then(this.next).rejected(this.reject);
+
+    }).then(function (readme) {
+
+        switch (terminalOutputType) {
+
+            case "json": {
+
+                logger.output(JSON.stringify(readme, null, 4));
+                
+                break;
+            }
+
+            case "json-stripped": {
+
+                logger.output(JSON.stringify(readme));
+
+                break;
+            }
+
+            case "verbose":
+            default: {
+
+                logger.output("");
+                logger.output("Chan package readme for " + this.pool.chan.name + ":");
+                logger.output("--------------------------------------------------------------------------------");
+                logger.output("");
+                logger.output(readme);
+                logger.output("");
+
+                break;
+            }
+
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["resource"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        this.pool.chan = chan;
+
+        chan.listAllResourceFiles().then(this.next).rejected(this.reject);
+
+    }).then(function (resourceFiles) {
+
+        switch (terminalOutputType) {
+
+            case "json": {
+
+                logger.output(JSON.stringify(resourceFiles, null, 4));
+                
+                break;
+            }
+
+            case "json-stripped": {
+
+                logger.output(JSON.stringify(resourceFiles));
+
+                break;
+            }
+
+            case "verbose":
+            default: {
+
+                logger.output("");
+                logger.output("Chan package resource files for " + this.pool.chan.name + ":");
+                logger.output("--------------------------------------------------------------------------------");
+                logger.output("");
+
+                resourceFiles.forEach(function (resourceFile) {
+                    logger.output(resourceFile);
+                });
+
+                logger.output("");
+
+                break;
+            }
+
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["file"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    var filePath = mewUtil.ensurePosixPath(commandArguments[1]);
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        this.pool.chan = chan;
+
+        chan.fileInfo(filePath).then(this.next).rejected(this.reject);
+
+    }).then(function (info) {
+
+        switch (terminalOutputType) {
+
+            case "json": {
+
+                logger.output(JSON.stringify(info, null, 4));
+                
+                break;
+            }
+
+            case "json-stripped": {
+
+                logger.output(JSON.stringify(info));
+
+                break;
+            }
+
+            case "verbose":
+            default: {
+
+                logger.output("");
+                logger.output("Resource file info from chan package " + this.pool.chan.name + ":");
+                logger.output("--------------------------------------------------------------------------------");
+                logger.output("");
+                
+                var list = [
+
+                    "path", "type", "",
+
+                    "fileSize", "",
+
+                    "dataSize", "compressed", "",
+
+                    "protected", "cleared", "",
+
+                    "createdDate",
+                    "lastModifiedDate"
+
+                ];
+
+                list.forEach(function (key) {
+
+                    if (key) {
+
+                        if (!mewUtil.isNull(info[key])) {
+
+                            var outputKey = key.replace(/(^[a-z])|[A-Z]/g, function (character) {
+                                if (character=== character.toLowerCase()) {
+                                    return character.toUpperCase();
+                                } else {
+                                    return " " + character;
+                                }
+                            });
+
+                            while (outputKey.length < 20) {
+                                outputKey = " " + outputKey;
+                            }
+
+                            var outputValue = info[key];
+                            if (mewUtil.isKindOf(outputValue, Date)) {
+                                outputValue = mewUtil.formatDate(outputValue, "YYYY-MM-DD hh:mm:ss");
+                            } else if (mewUtil.isKindOf(outputValue, Boolean)) {
+                                outputValue = outputValue ? "yes" : "no"
+                            }
+
+                            logger.output(outputKey + ": " + outputValue);
+
+                        }
+
+                    } else {
+                        logger.output("");
+                    }
+
+                });
+
+                logger.output("");
+
+                break;
+            }
+
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["verify"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    var innerPath = "";
+    var outputPath = process.cwd(); 
+
+    if (commandArguments.length === 2) {
+        innerPath = mewUtil.ensurePosixPath(commandArguments[1]);
+    } else if (commandArguments.length >= 3) {
+        innerPath = mewUtil.ensurePosixPath(commandArguments[1]);
+        outputPath = path.resolve(commandArguments[2]);
+    }
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        this.pool.chan = chan;
+
+        if ((terminalOutputType !== "json") && (terminalOutputType !== "json-stripped")) {
+            logger.info("Chan file index is correct");
+        }
+
+        chan.listAllResourceFiles().then(this.next).rejected(this.reject);
+
+    }).then(function (resourceFiles) {
+
+        var chan = this.pool.chan;
+
+        mewUtil.async.all(resourceFiles, function (resourceFile, index) {
+
+            if ((terminalOutputType !== "json") && (terminalOutputType !== "json-stripped")) {
+                logger.info("Verifying resource file[" + (index + 1) + "] " + resourceFile);
+            }
+
+            chan.isFileCorrect(resourceFile).then(function (correct) {
+
+                if (correct) {
+                    this.next();
+                } else {
+                    this.reject(new Error("Resource file " + resourceFile + " is not correct"));
+                }
+
+            }).then(this.next).rejected(this.reject);
+
+        }).then(this.next).rejected(this.reject);
+
+    }).then(function () {
+
+        if (terminalOutputType === "json") {
+            logger.output(JSON.stringify({
+                "succeeded": true
+            }, null, 4));
+        } else if (terminalOutputType === "json-stripped") {
+            logger.output(JSON.stringify({
+                "succeeded": true
+            })); 
+        } else {
+            logger.celebr("Chan package has been verified");
+        }
+
+    }).rejected(function (error) {
+
+        if (terminalOutputType === "json") {
+            logger.output(JSON.stringify({
+                "succeeded": false,
+                "message": error.message
+            }, null, 4));
+        } else if (terminalOutputType === "json-stripped") {
+            logger.output(JSON.stringify({
+                "succeeded": false,
+                "message": error.message
+            })); 
+        } else {
+            logger.error(error);
+        }
+
+        process.exit(-1);
+
+    });
+
+};
+
+commands["extract"] = function (logger) {
+
+    var chanPath = commandArguments[0];
+
+    var innerPath = "";
+    var outputPath = process.cwd(); 
+
+    if (commandArguments.length === 2) {
+        innerPath = mewUtil.ensurePosixPath(commandArguments[1]);
+    } else if (commandArguments.length >= 3) {
+        innerPath = mewUtil.ensurePosixPath(commandArguments[1]);
+        outputPath = path.resolve(commandArguments[2]);
+    }
+
+    mewUtil.async(function () {
+
+        if (!chanPath) {
+
+            this.reject(new Error("The path of the chan package is invalid"));
+
+        } else {
+
+            fs.exists(chanPath, (function (exists) {
+
+                if (exists) {
+
+                    fs.stat(chanPath, (function (error, stats) {
+
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            if (!stats.isFile()) {
+                                this.reject(new Error("The path of the chan package is invalid"));
+                            } else {
+                                this.next();
+                            }
+                        }
+
+                    }).bind(this));
+
+                } else {
+                    this.reject(new Error("The path of the chan package is invalid"));
+                }
+
+            }).bind(this));
+
+        }
+
+    }).then(function () {
+
+        if (rsaCertFile) {
+            fs.readFile(rsaCertFile, (function (error, buffer) {
+                if (error) {
+                    this.reject(error);
+                } else {
+                    this.next(buffer.toString("utf8"));
+                }
+            }).bind(this));
+        } else {
+            this.next();
+        }
+
+    }).then(function (rsaCert) {
+
+        mewUtil.getChanPackage(chanPath, {
+            "rsaCert": rsaCert,
+            "rsaKeyHash": rsaKeyHash,
+            "blockAlgorithm": blockAlgorithm
+        }).ready(this.next).rejected(this.reject);
+
+    }).then(function (chan) {
+
+        this.pool.chan = chan;
+
+        chan.listAllResourceFiles().then(function (resourceFiles) {
+
+            this.next(resourceFiles.filter(function (resourceFile) {
+
+                return ((resourceFile.substring(0, innerPath.length + 1) === innerPath + "/") || 
+                    (resourceFile === innerPath) || (innerPath === ""));
+
+            }));
+
+        }).then(this.next).rejected(this.reject);
+
+    }).then(function (resourceFiles) {
+
+        var chan = this.pool.chan;
+
+        this.pool.resourceFiles = resourceFiles;
+
+        if (resourceFiles.length > 0) {
+            if (resourceFiles.length > 1) {
+                logger.info("There are " + resourceFiles.length + " files to extract");
+            } else {
+                logger.info("There is only 1 file to extract");
+            }
+        }
+
+        if (innerPath === resourceFiles[0]) {
+
+            logger.info("Extracting resource file " + innerPath);
+
+            var write = (function (outputAsDir) {
+
+                var outputFilePath = outputPath;
+                if (outputAsDir) {
+                    outputFilePath = path.resolve(outputPath, path.basename(innerPath));
+                }
+
+                mewUtil.makeDir(path.dirname(outputFilePath), (function (error) {
+
+                    if (error) {
+
+                        this.reject(error);
+
+                    } else {
+
+                        chan.createReadStream(resourceFiles[0]).then(function (readStream) {
+
+                            var writeStream = fs.createWriteStream(outputFilePath);
+
+                            writeStream.on("finish", this.next);
+
+                            readStream.pipe(writeStream, {
+                                "end": true
+                            });
+
+                        }).then(this.next).rejected(this.reject);
+
+                    }
+
+                }).bind(this));
+
+            }).bind(this);
+
+            fs.exists(outputPath, (function (exists) {
+                if (exists) {
+                    fs.stat(outputPath, (function (error, stats) {
+                        if (error) {
+                            this.reject(error);
+                        } else {
+                            write(stats.isDirectory());
+                        }
+                    }).bind(this));
+                } else {
+                    write(false);
+                }
+            }).bind(this));
+
+        } else {
+
+            mewUtil.async.all(resourceFiles, function (resourceFile, index) {
+
+                logger.info("Extracting resource file[" + (index + 1) + "] " + resourceFile);
+
+                var outputFilePath = path.resolve(outputPath, path.relative(innerPath, resourceFile));
+
+                mewUtil.makeDir(path.dirname(outputFilePath), (function (error) {
+
+                    if (error) {
+
+                        this.reject(error);
+
+                    } else {
+
+                        chan.createReadStream(resourceFile).then(function (readStream) {
+
+                            var writeStream = fs.createWriteStream(outputFilePath);
+
+                            writeStream.on("finish", this.next);
+
+                            readStream.pipe(writeStream, {
+                                "end": true
+                            });
+
+                        }).then(this.next).rejected(this.reject);
+
+                    }
+
+                }).bind(this));
+
+            }).then(this.next).rejected(this.reject);
+
+        }
+
+    }).then(function () {
+
+        if (this.pool.resourceFiles.length > 0) {
+            logger.celebr("All resources files has been extracted");
+        } else {
+            logger.celebr("No resources file has been extracted");
+        }
+
+    }).rejected(function (error) {
+
+        logger.error(error);
+
+        process.exit(-1);
+
+    });
+
+};
+
+if (help) {
+
+    console.log("");
+    console.log("Chan package utility for Mewchan's world");
+    console.log("--------------------------------------------------------------------------------");
+
+    console.log("                             --help  show this information");
+    console.log("                          --version  print version");
+    console.log("                        --log-level  default 'info'");
+    console.log("                        --log-style  'none', 'light' or 'dark'");
+    console.log("        --log-support-multiple-line  default 'yes'");
+    console.log("                     --package-name  package name");
+    console.log("                    --package-build  package build number");
+    console.log("                   --package-author  package author");
+    console.log("                  --package-version  package version");
+    console.log("              --package-description  package description");
+    console.log("                  --package-company  package company");
+    console.log("                  --package-website  package website");
+    console.log("              --script-initial-file  intial script file to start up package");
+    console.log("               --script-postprocess  postprocess to deal with combined script");
+    console.log("                      --export-file  the export path of the chan package");
+    console.log("             --combined-script-file  the export path of the combined script");
+    console.log("                  --executable-file  the export path of the executable file");
+    console.log("                     --license-file  license file path");
+    console.log("                      --readme-file  readme file path");
+    console.log("                     --rsa-key-file  RSA private key file to make it secure");
+    console.log("                     --rsa-key-hash  RSA private key hash to validate");
+    console.log("                    --rsa-cert-file  RSA public cert file to validate");
+    console.log("                      --signer-type  default 0");
+    console.log("                  --block-algorithm  default 'aes-256-cbc'");
+    console.log("             --terminal-output-type  'verbose', 'json' or 'json-stripped'");
+
+    console.log("");
+    console.log("Chan package utility command list");
+    console.log("--------------------------------------------------------------------------------");
+
+    console.log("");
+    console.log("    mew_chan [package] [<chan-folder>]");
+    console.log("        Generate new chan package");
+    console.log("            chan-folder        could be omitted, default is current path");
+
+    console.log("");
+    console.log("    mew_chan config [<chan-folder>]");
+    console.log("        Generate the config file if not exists, and update info according to");
+    console.log("        switches");
+    console.log("            chan-folder        could be omitted, default is current path");
+
+    console.log("");
+    console.log("    mew_chan scan [<chan-folder>]");
+    console.log("        Generate the config file if not exists, and update info according to");
+    console.log("        switches and the files below chan-path");
+    console.log("            chan-folder        could be omitted, default is current path");
+
+    console.log("");
+    console.log("    mew_chan confirm [<chan-folder>]");
+    console.log("        Confirm the new files configs found by scan commands");
+    console.log("            chan-folder        could be omitted, default is current path");
+
+    console.log("");
+    console.log("    mew_chan combine [<chan-folder>]");
+    console.log("        Combine the script files according to configurations");
+    console.log("            chan-folder        could be omitted, default is current path");
+
+    // console.log("");
+    // console.log("    mew_chan compile [<chan-folder>]");
+    // console.log("        Compile the script files to an executable accoding to configurations");
+    // console.log("            chan-folder        could be omitted, default is current path");
+
+    console.log("");
+    console.log("    mew_chan run [<chan-path>]");
+    console.log("        Run the chan with the scripts inside the chan");
+    console.log("            chan-path          the path of chan package");
+
+    console.log("");
+    console.log("    mew_chan info <chan-path>");
+    console.log("        Print info of the chan package");
+    console.log("            chan-path          the path of chan package");
+
+    console.log("");
+    console.log("    mew_chan license <chan-path>");
+    console.log("        Print the license of the chan package");
+    console.log("            chan-path          the path of chan package");
+
+    console.log("");
+    console.log("    mew_chan readme <chan-path>");
+    console.log("        Print the readme of the chan package");
+    console.log("            chan-path          the path of chan package");
+
+    console.log("");
+    console.log("    mew_chan verify <chan-path>");
+    console.log("        Verify whether the chan package is valid");
+    console.log("            chan-path          the path of chan package");
+
+    console.log("");
+    console.log("    mew_chan resource <chan-path>");
+    console.log("        list resources files in the chan package");
+    console.log("            chan-path          the path of chan package");
+
+    console.log("");
+    console.log("    mew_chan file <chan-path> <resource-path>");
+    console.log("        print information of the resources file in the chan package");
+    console.log("            chan-path          the path of chan package");
+    console.log("            resource-path      the path of the resource file to get info");
+
+    console.log("");
+    console.log("    mew_chan extract <chan-path> [<resource-path>] [<output-path>]");
+    console.log("        Extract resource file from the chan package");
+    console.log("            chan-path          the path of chan package");
+    console.log("            resource-path      could be omitted, the path of the resource");
+    console.log("                               file to extract from the chan package");
+    console.log("            output-path        could be omitted, the path of the resource");
+    console.log("                               file to export to");
+    console.log("");
+
+} else if (version) {
+
+    console.log("0.1.0");
+
+} else {
+
+    var logger = new mewUtil.Logger({
+        "logLevel": logLevel,
+        "logStyle": logStyle,
+        "supportMultipleLine": logSupportMultipleLine,
+        "autorecordFileLine": false
+    });
+
+    if (invalidSwitches.length > 0) {
+
+        invalidSwitches.forEach(function (commandSwitch) {
+            logger.error("Invalid command line switches: " + commandSwitch);
+        });
+
+    } else {
+
+        if ((["config", "scan", "confirm", "package"].indexOf(command) !== -1) && (commandArguments.length > 0)) {
+            chanPath = commandArguments[0];
+        }
+
+        mewUtil.setUtilHomeDir(chanPath, function () {
+
+            process.on("uncaughtException", function (error) {
+                if (!error.processed) {
+                    logger.error(error);
+                    process.exit(-1);
+                }
+            });
+
+            if (commands[command]) {
+                commands[command](logger);
+            } else {
+                logger.system("Command [" + command + "] not implemented");
+            }
+
+        });
+
+    }
+
+}

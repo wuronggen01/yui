@@ -1,0 +1,39 @@
+.activity-view-layer {
+    position: absolute;
+    top:0px;
+    bottom:0px;
+    width:100%;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+body.user-selecting {
+    /* nothing */
+}
+
+body .selectable {
+    -webkit-user-select: text;
+}
+
+body.user-selecting .selectable {
+    -webkit-user-select: none;
+}
+
+body.user-selecting .selectable.selecting {
+    -webkit-user-select: text;
+    outline-style: none;
+}
+
+body.user-selecting .selectable.selecting.with-selecting-outline{
+    outline-style: auto;
+    outline-width: 5px;
+    outline-color: -webkit-focus-ring-color;
+}
+
+body.user-selecting .selectable.selecting.no-selecting-outline {
+    outline-style: none;
+}
+
+html, body {
+    -webkit-user-select: none;
+}

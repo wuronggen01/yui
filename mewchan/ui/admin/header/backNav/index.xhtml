@@ -1,0 +1,7 @@
+<!-- Nav DIV -->
+<div id = "NavigationBar">
+	<img id = "NavItemLeft" src="fraternity/header/mainNav/res/right.png"> </img>
+	<div id = "NavItemLeftBg" template:on-click="onLeftButtonClick()"></div>
+	<div id = "NavItemRight" template:on-click="onRightButtonClick()">${default(rightButtonText, '')}</div>
+	<div id = "NavItemCenter">${default(contentButtonText, '')}</div>
+</div>

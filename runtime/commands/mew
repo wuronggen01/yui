@@ -1,0 +1,205 @@
+#!/usr/bin/env mew_js
+
+var fs = require("fs");
+var path = require("path");
+
+var mewUtil = require("mew_util");
+var Mewchan = require("mewchan");
+
+var help = false;
+var version = false;
+
+var logLevel = null;
+var logStyle = null;
+var logSupportMultipleLine = null;
+
+var domain = null;
+var name = null;
+
+var logMewWithUsages = [];
+
+var fileArguments = [];
+
+process.argv.slice(2).forEach(function (argument) {
+
+    switch (argument.split("=")[0]) {
+
+        case "--help": { help = true; break; }
+        case "--version": { version = true; break; }
+
+        case "--log-level": { logLevel = argument.split("=").slice(1).join("="); break; }
+        case "--log-style": { logStyle = argument.split("=").slice(1).join("="); break; }
+        case "--log-support-multiple-line": { logSupportMultipleLine = (argument.split("=").slice(1).join("=") === "yes"); break; }
+
+        case "--log-mew-with-usages": { logMewWithUsages.push(argument.split("=").slice(1).join("=")); break; }
+
+        case "--domain": { domain = argument.split("=").slice(1).join("="); break; }
+        case "--name": { name = argument.split("=").slice(1).join("="); break; }
+
+        default: { 
+
+            fileArguments.push(argument);
+
+            break; 
+        }
+
+    }
+
+});
+
+if (help) {
+
+    console.log("");
+    console.log("Start command for Mewchan's world");
+    console.log("--------------------------------------------------------------------------------");
+    console.log("                             --help  show this information");
+    console.log("                          --version  print version");
+    console.log("                        --log-level  default 'info'");
+    console.log("                        --log-style  'none', 'light' or 'dark'");
+    console.log("        --log-support-multiple-line  default 'yes'");
+    console.log("              --log-mew-with-usages  default ''");
+    console.log("                           --domain  default 'cn.mewmew.mewchan'");
+    console.log("                             --name  default 'mewchan'");
+    console.log("                          --timeout  default '2000'");
+    console.log("                 --pipe-case-output  default 'no'");
+    console.log("              --case-output-is-text  default 'yes'");
+    console.log("  --only-record-case-output-to-file  default 'yes'");
+    console.log("                                  *  js file as brain file");
+    console.log("                                  *  chan file as mewchan package file");
+    console.log("                                  *  directory as mewchan working directory");
+    console.log("");
+
+} else if (version) {
+
+    console.log("0.1.0");
+
+} else {
+
+    var logger = new mewUtil.Logger({
+        "logLevel": "warn", 
+        "prefix": "Mewchan Loader: "
+    });
+
+    var options = {
+        "logLevel": logLevel,
+        "logStyle": logStyle,
+        "logWithMultipleLineSupport": logSupportMultipleLine,
+        "logMewWithUsages": logMewWithUsages
+    };
+
+    var workingPath = null;
+    var chanPath = null;
+    var brainPath = null;
+
+    mewUtil.async.all(fileArguments, function (resourcePath) {
+
+        var filePath = path.resolve(resourcePath);
+
+        fs.exists(filePath, (function (exists) {
+
+            if (exists) {
+
+                fs.stat(filePath, (function (error, stats) {
+
+                    if (error) {
+                        this.reject(error);
+                    } else {
+
+                        if (stats.isFile()) {
+
+                            var extname = path.extname(filePath);
+
+                            if (extname === ".js") {
+
+                                if (!brainPath) {
+                                    brainPath = filePath; this.next();
+                                } else {
+                                    this.reject(new Error("Duplicated brain file path"));
+                                }
+
+                            } else if (extname === ".chan") {
+
+                                if (!chanPath) {
+                                    chanPath = filePath; this.next();
+                                } else {
+                                    this.reject(new Error("Duplicated chan file path"));
+                                }
+
+                            }
+
+                        } else {
+
+                            if (!workingPath) {
+                                workingPath = filePath; this.next();
+                            } else {
+                                this.reject(new Error("Duplicated working path"));
+                            }
+
+                        }
+
+                    }
+
+                }).bind(this));
+
+            } else {
+                this.reject(new Error("File not found at " + resourcePath));
+            }
+
+        }).bind(this));
+
+    }).then(function () {
+
+        if (workingPath && chanPath) {
+            this.reject(new Error("Working path and chan path could not be set at the same time"));
+        }
+
+        if (workingPath) {
+            process.chdir(workingPath);
+        }
+
+        if (brainPath) {
+            options.brainPath = brainPath;
+        }
+
+        var load = function () {
+            Mewchan.start(options).rejected(function (error) {
+                logger.error(error);
+            });
+        };
+
+        if (chanPath) {
+
+            var cwd = process.cwd();
+
+            process.cwd = function () {
+                return cwd;
+            };
+
+            process.chdir = function (path) {
+                cwd = path;
+            };
+
+            var chan = mewUtil.getChanPackage(chanPath);
+
+            chan.ready(function () {
+
+                mewUtil.registerUtilFS(chanPath, chan.fs, chan.require);
+
+                process.chdir(chanPath);
+
+                options.fs = chan.fs;
+                options.require = chan.require;
+
+                load();
+
+            }).rejected(function (error) {
+                logger.error(error);
+            });
+
+        } else {
+            load();
+        }
+
+    });
+
+}
